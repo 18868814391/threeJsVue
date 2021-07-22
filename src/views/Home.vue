@@ -41,10 +41,19 @@ export default {
       this.initTexture();
       this.initCamera();
       this.initLight();
-      // let chicken = new this.Chicken();
-      // this.scene.add(chicken);
+      let chicken = this.Chicken();
+      this.scene.add(chicken);
       let Car = this.Car();
+      Car.position.z = 100;
       this.scene.add(Car);
+      let Truck = this.Truck();
+      Truck.position.z = -150;
+      this.scene.add(Truck);
+      let Road = this.Road();
+      Road.position.z = -150;
+      this.scene.add(Road);
+      let Grass = this.Grass();
+      this.scene.add(Grass);
       this.initRender();
     },
     initCamera() {
@@ -179,7 +188,7 @@ export default {
         ),
         new THREE.MeshLambertMaterial({ color: 0x333333 })
       );
-      wheel.position.z = 6 * self.zoom;
+      wheel.position.z = 6 * this.zoom;
       return wheel;
     },
     Car() {
@@ -237,15 +246,140 @@ export default {
       cabin.castShadow = true;
       cabin.receiveShadow = true;
       car.add(cabin);
-      const frontWheel = new this.Wheel();
+      const frontWheel = this.Wheel();
       frontWheel.position.x = -18 * this.zoom;
       car.add(frontWheel);
-      const backWheel = new this.Wheel();
+      const backWheel = this.Wheel();
       backWheel.position.x = 18 * this.zoom;
       car.add(backWheel);
       car.castShadow = true;
       car.receiveShadow = false;
       return car;
+    },
+    Truck() {
+      const self = this;
+      const truck = new THREE.Group();
+      const color =
+        this.vechicleColors[
+          Math.floor(Math.random() * this.vechicleColors.length)
+        ];
+
+      const base = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(
+          100 * self.zoom,
+          25 * self.zoom,
+          5 * self.zoom
+        ),
+        new THREE.MeshLambertMaterial({ color: 0xb4c6fc })
+      );
+      base.position.z = 10 * self.zoom;
+      truck.add(base);
+
+      const cargo = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(
+          75 * self.zoom,
+          35 * self.zoom,
+          40 * self.zoom
+        ),
+        new THREE.MeshPhongMaterial({ color: 0xb4c6fc })
+      );
+      cargo.position.x = 15 * self.zoom;
+      cargo.position.z = 30 * self.zoom;
+      cargo.castShadow = true;
+      cargo.receiveShadow = true;
+      truck.add(cargo);
+
+      const cabin = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(
+          25 * self.zoom,
+          30 * self.zoom,
+          30 * self.zoom
+        ),
+        [
+          new THREE.MeshPhongMaterial({ color }), // back
+          new THREE.MeshPhongMaterial({ color, map: self.truckFrontTexture }),
+          new THREE.MeshPhongMaterial({
+            color,
+            map: self.truckRightSideTexture,
+          }),
+          new THREE.MeshPhongMaterial({
+            color,
+            map: self.truckLeftSideTexture,
+          }),
+          new THREE.MeshPhongMaterial({ color }), // top
+          new THREE.MeshPhongMaterial({ color }), // bottom
+        ]
+      );
+      cabin.position.x = -40 * this.zoom;
+      cabin.position.z = 20 * this.zoom;
+      cabin.castShadow = true;
+      cabin.receiveShadow = true;
+      truck.add(cabin);
+
+      const frontWheel = this.Wheel();
+      frontWheel.position.x = -38 * this.zoom;
+      truck.add(frontWheel);
+
+      const middleWheel = this.Wheel();
+      middleWheel.position.x = -10 * this.zoom;
+      truck.add(middleWheel);
+
+      const backWheel = this.Wheel();
+      backWheel.position.x = 30 * this.zoom;
+      truck.add(backWheel);
+
+      return truck;
+    },
+    Road() {
+      const self = this;
+      const road = new THREE.Group();
+
+      const createSection = (color) =>
+        new THREE.Mesh(
+          new THREE.PlaneBufferGeometry(
+            self.boardWidth * self.zoom,
+            self.positionWidth * self.zoom
+          ),
+          new THREE.MeshPhongMaterial({ color })
+        );
+
+      const middle = createSection(0x454a59);
+      middle.receiveShadow = true;
+      road.add(middle);
+
+      const left = createSection(0x393d49);
+      left.position.x = -self.boardWidth * self.zoom;
+      road.add(left);
+
+      const right = createSection(0x393d49);
+      right.position.x = self.boardWidth * self.zoom;
+      road.add(right);
+
+      return road;
+    },
+    Grass() {
+      const self = this;
+      const grass = new THREE.Group();
+      const createSection = (color) =>
+        new THREE.Mesh(
+          new THREE.BoxBufferGeometry(
+            self.boardWidth * self.zoom,
+            self.positionWidth * self.zoom,
+            3 * self.zoom
+          ),
+          new THREE.MeshPhongMaterial({ color })
+        );
+      const middle = createSection(0xbaf455);
+      middle.receiveShadow = true;
+      grass.add(middle);
+      const left = createSection(0x99c846);
+      left.position.x = -this.boardWidth * this.zoom;
+      grass.add(left);
+      const right = createSection(0x99c846);
+      right.position.x = this.boardWidth * this.zoom;
+      grass.add(right);
+      grass.position.z = 1.5 * this.zoom;
+      return grass;
     },
   },
 };
