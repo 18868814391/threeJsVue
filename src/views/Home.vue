@@ -34,13 +34,13 @@ export default {
 
       roads: [0, 1, 2, 3, 4, 5],
 
-      lanes: "",
+      lanes: [],
       currentLane: "",
       currentColumn: "",
 
       previousTimestamp: "",
       startMoving: "",
-      moves: "",
+      moves: [],
       stepStartTimestamp: "",
     };
   },
@@ -63,26 +63,27 @@ export default {
       this.scene.add(this.chicken);
       this.initaliseValues();
 
-      let Car = this.Car();
-      Car.position.z = 100;
-      this.scene.add(Car);
+      // let Car = this.Car();
+      // Car.position.z = 100;
+      // this.scene.add(Car);
 
-      let Truck = this.Truck();
-      Truck.position.z = -150;
-      this.scene.add(Truck);
+      // let Truck = this.Truck();
+      // Truck.position.z = -150;
+      // this.scene.add(Truck);
 
-      let Road = this.Road();
-      Road.position.z = -150;
-      this.scene.add(Road);
+      // let Road = this.Road();
+      // Road.position.z = -150;
+      // this.scene.add(Road);
 
-      let Grass = this.Grass();
-      this.scene.add(Grass);
+      // let Grass = this.Grass();
+      // this.scene.add(Grass);
 
-      let Tree = this.Tree();
-      Tree.position.z = 200;
-      this.scene.add(Tree);
+      // let Tree = this.Tree();
+      // Tree.position.z = 200;
+      // this.scene.add(Tree);
 
       this.initRender();
+      this.listenMove();
     },
     initCamera() {
       this.camera = new THREE.OrthographicCamera(
@@ -543,9 +544,17 @@ export default {
         })
         .filter((lane) => lane.index >= 0);
     },
+    addLane() {
+      const index = this.lanes.length;
+      const lane = this.Lane(index);
+      lane.mesh.position.y = index * this.positionWidth * this.zoom;
+      this.scene.add(lane.mesh);
+      this.lanes.push(lane);
+    },
     initaliseValues() {
       this.lanes = this.generateLanes();
 
+      console.log("this.lanesggg", this.lanes);
       this.currentLane = 0;
       this.currentColumn = Math.floor(this.columns / 2);
 
@@ -560,6 +569,85 @@ export default {
 
       this.camera.position.y = this.initialCameraPositionY;
       this.camera.position.x = this.initialCameraPositionX;
+    },
+    move(direction) {
+      const finalPositions = this.moves.reduce(
+        (position, move) => {
+          if (move === "forward")
+            return { lane: position.lane + 1, column: position.column };
+          if (move === "backward")
+            return { lane: position.lane - 1, column: position.column };
+          if (move === "left")
+            return { lane: position.lane, column: position.column - 1 };
+          if (move === "right")
+            return { lane: position.lane, column: position.column + 1 };
+        },
+        { lane: this.currentLane, column: this.currentColumn }
+      );
+
+      if (direction === "forward") {
+        if (
+          this.lanes[finalPositions.lane + 1].type === "forest" &&
+          this.lanes[finalPositions.lane + 1].occupiedPositions.has(
+            finalPositions.column
+          )
+        )
+          return;
+        if (!this.stepStartTimestamp) this.startMoving = true;
+        this.addLane();
+      } else if (direction === "backward") {
+        if (finalPositions.lane === 0) return;
+        if (
+          this.lanes[finalPositions.lane - 1].type === "forest" &&
+          this.lanes[finalPositions.lane - 1].occupiedPositions.has(
+            finalPositions.column
+          )
+        )
+          return;
+        if (!this.stepStartTimestamp) this.startMoving = true;
+      } else if (direction === "left") {
+        if (finalPositions.column === 0) return;
+        console.log(123);
+        console.log("this.lanes", this.lanes);
+        console.log("finalPositions.lane", finalPositions.lane);
+        console.log(this.lanes[finalPositions.lane]);
+        if (
+          this.lanes[finalPositions.lane].type === "forest" &&
+          this.lanes[finalPositions.lane].occupiedPositions.has(
+            finalPositions.column - 1
+          )
+        )
+          return;
+        if (!this.stepStartTimestamp) this.startMoving = true;
+      } else if (direction === "right") {
+        if (finalPositions.column === this.columns - 1) return;
+        if (
+          this.lanes[finalPositions.lane].type === "forest" &&
+          this.lanes[finalPositions.lane].occupiedPositions.has(
+            finalPositions.column + 1
+          )
+        )
+          return;
+        if (!this.stepStartTimestamp) this.startMoving = true;
+      }
+      this.moves.push(direction);
+    },
+    listenMove() {
+      window.addEventListener("keydown", (event) => {
+        if (event.keyCode == "38" || event.keyCode == "87") {
+          // up arrow
+          this.move("forward");
+        } else if (event.keyCode == "40" || event.keyCode == "83") {
+          // down arrow
+          this.move("backward");
+        } else if (event.keyCode == "37" || event.keyCode == "65") {
+          // left arrow
+          this.move("left");
+        } else if (event.keyCode == "39" || event.keyCode == "68") {
+          // right arrow
+          this.move("right");
+        }
+      });
     },
   },
 };
