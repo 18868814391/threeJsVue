@@ -18,6 +18,11 @@ export default {
       boardWidth: 42 * 17,
       stepTime: 200,
       vechicleColors: [0xa52523, 0xbdb638, 0x78b14b],
+      laneTypes: ["car", "truck", "forest"],
+      laneSpeeds: [2, 2.5, 3],
+      threeHeights: [20, 45, 60],
+      initialCameraPositionY: "",
+      initialCameraPositionX: "",
 
       carFrontTexture: "",
       carBackTexture: "",
@@ -26,12 +31,24 @@ export default {
       truckFrontTexture: "",
       truckRightSideTexture: "",
       truckLeftSideTexture: "",
+
+      roads: [0, 1, 2, 3, 4, 5],
+
+      lanes: "",
+      currentLane: "",
+      currentColumn: "",
+
+      previousTimestamp: "",
+      startMoving: "",
+      moves: "",
+      stepStartTimestamp: "",
     };
   },
   mounted() {
     this.scene = "";
     this.camera = "";
     this.renderer = "";
+    this.chicken = "";
     this.init();
   },
   methods: {
@@ -41,19 +58,30 @@ export default {
       this.initTexture();
       this.initCamera();
       this.initLight();
-      let chicken = this.Chicken();
-      this.scene.add(chicken);
+
+      this.chicken = this.Chicken();
+      this.scene.add(this.chicken);
+      this.initaliseValues();
+
       let Car = this.Car();
       Car.position.z = 100;
       this.scene.add(Car);
+
       let Truck = this.Truck();
       Truck.position.z = -150;
       this.scene.add(Truck);
+
       let Road = this.Road();
       Road.position.z = -150;
       this.scene.add(Road);
+
       let Grass = this.Grass();
       this.scene.add(Grass);
+
+      let Tree = this.Tree();
+      Tree.position.z = 200;
+      this.scene.add(Tree);
+
       this.initRender();
     },
     initCamera() {
@@ -70,9 +98,11 @@ export default {
       this.camera.rotation.z = (10 * Math.PI) / 180;
       const initialCameraPositionY =
         -Math.tan(this.camera.rotation.x) * this.distance;
+      this.initialCameraPositionY = initialCameraPositionY;
       const initialCameraPositionX =
         Math.tan(this.camera.rotation.y) *
         Math.sqrt(this.distance ** 2 + initialCameraPositionY ** 2);
+      this.initialCameraPositionX = initialCameraPositionX;
       this.camera.position.y = initialCameraPositionY;
       this.camera.position.x = initialCameraPositionX;
       this.camera.position.z = this.distance;
@@ -380,6 +410,156 @@ export default {
       grass.add(right);
       grass.position.z = 1.5 * this.zoom;
       return grass;
+    },
+    Tree() {
+      const self = this;
+      const tree = new THREE.Group();
+
+      const stump = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(
+          15 * self.zoom,
+          15 * self.zoom,
+          20 * self.zoom
+        ),
+        new THREE.MeshPhongMaterial({ color: 0x4d2926 })
+      );
+      stump.position.z = 10 * self.zoom;
+      stump.castShadow = true;
+      stump.receiveShadow = true;
+      tree.add(stump);
+
+      let height =
+        this.threeHeights[Math.floor(Math.random() * self.threeHeights.length)];
+
+      const crown = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(
+          30 * self.zoom,
+          30 * self.zoom,
+          height * self.zoom
+        ),
+        new THREE.MeshLambertMaterial({ color: 0x7aa21d })
+      );
+      crown.position.z = (height / 2 + 20) * self.zoom;
+      crown.castShadow = true;
+      crown.receiveShadow = false;
+      tree.add(crown);
+
+      return tree;
+    },
+    Lane(index) {
+      // const self = this;
+      let proto = { mesh: "0", index: "", type: "" };
+      proto.index = index;
+      proto.type =
+        index <= 0
+          ? "field"
+          : this.laneTypes[Math.floor(Math.random() * this.laneTypes.length)];
+
+      switch (proto.type) {
+        case "field": {
+          proto.type = "field";
+          proto.mesh = this.Grass();
+          return proto;
+        }
+        case "forest": {
+          proto.mesh = this.Grass();
+
+          proto.occupiedPositions = new Set();
+          proto.trees = [1, 2, 3, 4].map(() => {
+            const tree = this.Tree();
+            let position;
+            do {
+              position = Math.floor(Math.random() * this.columns);
+            } while (proto.occupiedPositions.has(position));
+            proto.occupiedPositions.add(position);
+            tree.position.x =
+              (position * this.positionWidth + this.positionWidth / 2) *
+                this.zoom -
+              (this.boardWidth * this.zoom) / 2;
+            proto.mesh.add(tree);
+            return tree;
+          });
+          return proto;
+        }
+        case "car": {
+          proto.mesh = this.Road();
+          proto.direction = Math.random() >= 0.5;
+
+          const occupiedPositions = new Set();
+          proto.vechicles = [1, 2, 3].map(() => {
+            const vechicle = this.Car();
+            let position;
+            do {
+              position = Math.floor((Math.random() * this.columns) / 2);
+            } while (occupiedPositions.has(position));
+            occupiedPositions.add(position);
+            vechicle.position.x =
+              (position * this.positionWidth * 2 + this.positionWidth / 2) *
+                this.zoom -
+              (this.boardWidth * this.zoom) / 2;
+            if (!proto.direction) vechicle.rotation.z = Math.PI;
+            proto.mesh.add(vechicle);
+            return vechicle;
+          });
+
+          proto.speed =
+            this.laneSpeeds[Math.floor(Math.random() * this.laneSpeeds.length)];
+          return proto;
+        }
+        case "truck": {
+          proto.mesh = this.Road();
+          proto.direction = Math.random() >= 0.5;
+
+          const occupiedPositions = new Set();
+          proto.vechicles = [1, 2].map(() => {
+            const vechicle = this.Truck();
+            let position;
+            do {
+              position = Math.floor((Math.random() * this.columns) / 3);
+            } while (occupiedPositions.has(position));
+            occupiedPositions.add(position);
+            vechicle.position.x =
+              (position * this.positionWidth * 3 + this.positionWidth / 2) *
+                this.zoom -
+              (this.boardWidth * this.zoom) / 2;
+            if (!proto.direction) vechicle.rotation.z = Math.PI;
+            proto.mesh.add(vechicle);
+            return vechicle;
+          });
+
+          proto.speed =
+            this.laneSpeeds[Math.floor(Math.random() * this.laneSpeeds.length)];
+          return proto;
+        }
+      }
+    },
+    generateLanes() {
+      [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        .map((index) => {
+          const lane = this.Lane(index);
+          lane.mesh.position.y = index * this.positionWidth * this.zoom;
+          this.scene.add(lane.mesh);
+          return lane;
+        })
+        .filter((lane) => lane.index >= 0);
+    },
+    initaliseValues() {
+      this.lanes = this.generateLanes();
+
+      this.currentLane = 0;
+      this.currentColumn = Math.floor(this.columns / 2);
+
+      this.previousTimestamp = null;
+
+      this.startMoving = false;
+      this.moves = [];
+      this.stepStartTimestamp;
+
+      this.chicken.position.x = 0;
+      this.chicken.position.y = 0;
+
+      this.camera.position.y = this.initialCameraPositionY;
+      this.camera.position.x = this.initialCameraPositionX;
     },
   },
 };
