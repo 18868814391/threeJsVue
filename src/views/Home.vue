@@ -84,6 +84,7 @@ export default {
 
       this.initRender();
       this.listenMove();
+      requestAnimationFrame(this.animate);
     },
     initCamera() {
       this.camera = new THREE.OrthographicCamera(
@@ -535,7 +536,7 @@ export default {
       }
     },
     generateLanes() {
-      [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+      return [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         .map((index) => {
           const lane = this.Lane(index);
           lane.mesh.position.y = index * this.positionWidth * this.zoom;
@@ -553,8 +554,6 @@ export default {
     },
     initaliseValues() {
       this.lanes = this.generateLanes();
-
-      console.log("this.lanesggg", this.lanes);
       this.currentLane = 0;
       this.currentColumn = Math.floor(this.columns / 2);
 
@@ -607,10 +606,6 @@ export default {
         if (!this.stepStartTimestamp) this.startMoving = true;
       } else if (direction === "left") {
         if (finalPositions.column === 0) return;
-        console.log(123);
-        console.log("this.lanes", this.lanes);
-        console.log("finalPositions.lane", finalPositions.lane);
-        console.log(this.lanes[finalPositions.lane]);
         if (
           this.lanes[finalPositions.lane].type === "forest" &&
           this.lanes[finalPositions.lane].occupiedPositions.has(
@@ -648,6 +643,161 @@ export default {
           this.move("right");
         }
       });
+    },
+    animate(timestamp) {
+      requestAnimationFrame(this.animate);
+
+      if (!this.previousTimestamp) this.previousTimestamp = timestamp;
+      const delta = timestamp - this.previousTimestamp;
+      this.previousTimestamp = timestamp;
+
+      // Animate cars and trucks moving on the lane
+      this.lanes.forEach((lane) => {
+        if (lane.type === "car" || lane.type === "truck") {
+          const aBitBeforeTheBeginingOfLane =
+            (-this.boardWidth * this.zoom) / 2 -
+            this.positionWidth * 2 * this.zoom;
+          const aBitAfterTheEndOFLane =
+            (this.boardWidth * this.zoom) / 2 +
+            this.positionWidth * 2 * this.zoom;
+          lane.vechicles.forEach((vechicle) => {
+            if (lane.direction) {
+              vechicle.position.x =
+                vechicle.position.x < aBitBeforeTheBeginingOfLane
+                  ? aBitAfterTheEndOFLane
+                  : (vechicle.position.x -= (lane.speed / 16) * delta);
+            } else {
+              vechicle.position.x =
+                vechicle.position.x > aBitAfterTheEndOFLane
+                  ? aBitBeforeTheBeginingOfLane
+                  : (vechicle.position.x += (lane.speed / 16) * delta);
+            }
+          });
+        }
+      });
+
+      if (this.startMoving) {
+        this.stepStartTimestamp = timestamp;
+        this.startMoving = false;
+      }
+
+      if (this.stepStartTimestamp) {
+        const moveDeltaTime = timestamp - this.stepStartTimestamp;
+        const moveDeltaDistance =
+          Math.min(moveDeltaTime / this.stepTime, 1) *
+          this.positionWidth *
+          this.zoom;
+        const jumpDeltaDistance =
+          Math.sin(Math.min(moveDeltaTime / this.stepTime, 1) * Math.PI) *
+          8 *
+          this.zoom;
+        switch (this.moves[0]) {
+          case "forward": {
+            this.camera.position.y =
+              this.initialCameraPositionY +
+              this.currentLane * this.positionWidth * this.zoom +
+              moveDeltaDistance;
+            this.chicken.position.y =
+              this.currentLane * this.positionWidth * this.zoom +
+              moveDeltaDistance; // initial chicken position is 0
+            this.chicken.position.z = jumpDeltaDistance;
+            break;
+          }
+          case "backward": {
+            this.camera.position.y =
+              this.initialCameraPositionY +
+              this.currentLane * this.positionWidth * this.zoom -
+              moveDeltaDistance;
+            this.chicken.position.y =
+              this.currentLane * this.positionWidth * this.zoom -
+              moveDeltaDistance;
+            this.chicken.position.z = jumpDeltaDistance;
+            break;
+          }
+          case "left": {
+            this.camera.position.x =
+              this.initialCameraPositionX +
+              (this.currentColumn * this.positionWidth +
+                this.positionWidth / 2) *
+                this.zoom -
+              (this.boardWidth * this.zoom) / 2 -
+              moveDeltaDistance;
+            this.chicken.position.x =
+              (this.currentColumn * this.positionWidth +
+                this.positionWidth / 2) *
+                this.zoom -
+              (this.boardWidth * this.zoom) / 2 -
+              moveDeltaDistance; // initial chicken position is 0
+            this.chicken.position.z = jumpDeltaDistance;
+            break;
+          }
+          case "right": {
+            this.camera.position.x =
+              this.initialCameraPositionX +
+              (this.currentColumn * this.positionWidth +
+                this.positionWidth / 2) *
+                this.zoom -
+              (this.boardWidth * this.zoom) / 2 +
+              moveDeltaDistance;
+            this.chicken.position.x =
+              (this.currentColumn * this.positionWidth +
+                this.positionWidth / 2) *
+                this.zoom -
+              (this.boardWidth * this.zoom) / 2 +
+              moveDeltaDistance;
+            this.chicken.position.z = jumpDeltaDistance;
+            break;
+          }
+        }
+        // Once a step has ended
+        if (moveDeltaTime > this.stepTime) {
+          switch (this.moves[0]) {
+            case "forward": {
+              this.currentLane++;
+              break;
+            }
+            case "backward": {
+              this.currentLane--;
+              break;
+            }
+            case "left": {
+              this.currentColumn--;
+              break;
+            }
+            case "right": {
+              this.currentColumn++;
+              break;
+            }
+          }
+          this.moves.shift();
+          // If more steps are to be taken then restart counter otherwise stop stepping
+          this.stepStartTimestamp = this.moves.length === 0 ? null : timestamp;
+        }
+      }
+
+      // Hit test
+      if (
+        this.lanes[this.currentLane].type === "car" ||
+        this.lanes[this.currentLane].type === "truck"
+      ) {
+        const chickenMinX =
+          this.chicken.position.x - (this.chickenSize * this.zoom) / 2;
+        const chickenMaxX =
+          this.chicken.position.x + (this.chickenSize * this.zoom) / 2;
+        const vechicleLength = { car: 60, truck: 105 }[
+          this.lanes[this.currentLane].type
+        ];
+        this.lanes[this.currentLane].vechicles.forEach((vechicle) => {
+          const carMinX =
+            vechicle.position.x - (vechicleLength * this.zoom) / 2;
+          const carMaxX =
+            vechicle.position.x + (vechicleLength * this.zoom) / 2;
+          if (chickenMaxX > carMinX && chickenMinX < carMaxX) {
+            // this.endDOM.style.visibility = 'visible';
+          }
+        });
+      }
+      this.renderer.render(this.scene, this.camera);
     },
   },
 };
