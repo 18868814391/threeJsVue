@@ -1,6 +1,19 @@
 <template>
-  <div>
+  <div class="con">
+    <div class="hit">{{ currentLane }}</div>
+    <div v-if="end" class="end" @click="reStart()">
+      hit by car<br />
+      reStart
+    </div>
     <div id="container" ref="container"></div>
+    <div class="option">
+      <div class="option-up" @click="move('forward')">↑</div>
+      <div class="options">
+        <div class="options-1" @click="move('left')">←</div>
+        <div class="options-1" @click="move('backward')">↓</div>
+        <div class="options-1" @click="move('right')">→</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -10,6 +23,8 @@ export default {
   name: "ThreeTest",
   data() {
     return {
+      hit: 0,
+      end: false,
       distance: 500,
       zoom: 2,
       chickenSize: 15,
@@ -53,15 +68,16 @@ export default {
   },
   methods: {
     init() {
+      // 初始化
       // var self = this;
       this.scene = new THREE.Scene(); // 创建场景
-      this.initTexture();
-      this.initCamera();
-      this.initLight();
+      this.initTexture(); // 用canves画一些纹理图片
+      this.initCamera(); // 初始化相机
+      this.initLight(); // 初始化灯光
 
-      this.chicken = this.Chicken();
+      this.chicken = this.Chicken(); // 将player放入场景
       this.scene.add(this.chicken);
-      this.initaliseValues();
+      this.initaliseValues(); // 数据初始化
 
       // let Car = this.Car();
       // Car.position.z = 100;
@@ -81,10 +97,10 @@ export default {
       // let Tree = this.Tree();
       // Tree.position.z = 200;
       // this.scene.add(Tree);
-
-      this.initRender();
-      this.listenMove();
-      requestAnimationFrame(this.animate);
+      // this.initHelp();
+      this.initRender(); // render
+      this.listenMove(); // 监听键盘移动
+      requestAnimationFrame(this.animate); // 延迟1/60秒render一次 回调函数中要继续requestAnimationFrame()循环起来
     },
     initCamera() {
       this.camera = new THREE.OrthographicCamera(
@@ -165,6 +181,10 @@ export default {
       this.truckLeftSideTexture = new this.Texture(25, 30, [
         { x: 0, y: 5, w: 10, h: 10 },
       ]);
+    },
+    initHelp() {
+      let axesHelper = new THREE.AxesHelper(500); // 三维坐标辅助线
+      this.scene.add(axesHelper);
     },
     Texture(width, height, rects) {
       const canvas = document.createElement("canvas");
@@ -794,18 +814,90 @@ export default {
             vechicle.position.x + (vechicleLength * this.zoom) / 2;
           if (chickenMaxX > carMinX && chickenMinX < carMaxX) {
             // this.endDOM.style.visibility = 'visible';
+            this.end = true;
+            console.log("hit happen");
           }
         });
       }
       this.renderer.render(this.scene, this.camera);
     },
+    reStart() {
+      window.location.reload();
+    },
   },
 };
 </script>
-<style scoped>
-#container {
+<style lang="less" scoped>
+.con {
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  #container {
+    width: 100vw;
+    flex: 1;
+    overflow: hidden;
+  }
+  .hit {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 20px;
+    z-index: 1;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    background: black;
+    color: white;
+    text-align: center;
+    font-size: 40px;
+    font-weight: bold;
+  }
+  .end {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 100px;
+    background: black;
+    color: #ffffff;
+    font-size: 30px;
+    line-height: 40px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+  }
+  .option {
+    width: 100%;
+    height: 200px;
+    background: black;
+    color: white;
+    font-size: 40px;
+    .option-up {
+      width: 50px;
+      height: 50px;
+      border: 1px solid white;
+      text-align: center;
+      line-height: 50px;
+      margin: 10px auto;
+      cursor: pointer;
+    }
+    .options {
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      .options-1 {
+        width: 50px;
+        height: 50px;
+        border: 1px solid white;
+        text-align: center;
+        line-height: 50px;
+        margin: 10px 20px;
+        cursor: pointer;
+      }
+    }
+  }
 }
 </style>
