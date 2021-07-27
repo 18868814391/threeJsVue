@@ -1,5 +1,5 @@
 <template>
-  <div class="con">
+  <div ref="con" class="con">
     <div class="hit">{{ currentLane }}</div>
     <div v-if="end" class="end" @click="reStart()">
       hit by car<br />
@@ -19,6 +19,7 @@
 
 <script>
 import * as THREE from "three";
+import Stats from "./stats.js";
 export default {
   name: "ThreeTest",
   data() {
@@ -57,6 +58,7 @@ export default {
       startMoving: "",
       moves: [],
       stepStartTimestamp: "",
+      stats: "",
     };
   },
   mounted() {
@@ -64,6 +66,8 @@ export default {
     this.camera = "";
     this.renderer = "";
     this.chicken = "";
+    this.stats = new Stats();
+    this.$refs.con.appendChild(this.stats.dom);
     this.init();
   },
   methods: {
@@ -665,8 +669,9 @@ export default {
       });
     },
     animate(timestamp) {
+      this.stats.begin();
       requestAnimationFrame(this.animate);
-
+      this.stats.end();
       if (!this.previousTimestamp) this.previousTimestamp = timestamp;
       const delta = timestamp - this.previousTimestamp;
       this.previousTimestamp = timestamp;

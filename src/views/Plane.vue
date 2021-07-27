@@ -1,8 +1,9 @@
 <template>
-  <div id="world" class="world"></div>
+  <div id="world" ref="world" class="world"></div>
 </template>
 <script>
 import * as THREE from "three";
+import Stats from "./stats.js";
 export default {
   data() {
     return {
@@ -16,6 +17,7 @@ export default {
       Sky: "",
       Airplane: "",
       mousePos: { x: 0, y: 0 },
+      ambersPos: [{ x: 0, y: 0 }],
       Colors: {
         red: 0xf25346,
         white: 0xd8d0d1,
@@ -23,7 +25,9 @@ export default {
         pink: 0xf5986e,
         brownDark: 0x23190f,
         blue: 0x68c3c0,
+        glod: 0xffd700,
       },
+      stats: "",
     };
   },
   mounted() {
@@ -33,6 +37,8 @@ export default {
     this.hemisphereLight = "";
     this.shadowLight = "";
     this.container = "";
+    this.stats = new Stats();
+    this.$refs.world.appendChild(this.stats.dom);
     this.initWorld();
   },
   methods: {
@@ -46,6 +52,9 @@ export default {
       self.scene.add(self.Sky);
       this.createPlane();
       self.scene.add(self.Airplane);
+      let amber = this.createAmber();
+      self.scene.add(amber);
+
       this.renderer.render(self.scene, self.camera);
 
       document.addEventListener("mousemove", this.handleMouseMove, false);
@@ -291,12 +300,14 @@ export default {
     },
     animaLoop() {
       // 整体旋转
+      this.stats.begin();
       const self = this;
       this.Airplane.children[4].rotation.x += 0.3;
       this.Ocean.rotation.z += 0.005;
       this.Sky.rotation.z += 0.01;
       this.movePlane();
       this.renderer.render(self.scene, self.camera);
+      this.stats.end();
       requestAnimationFrame(this.animaLoop);
     },
     handleMouseMove(event) {
@@ -331,6 +342,26 @@ export default {
       let dt = tmax - tmin;
       let tv = tmin + pc * dt;
       return tv;
+    },
+    createAmber() {
+      const self = this;
+      // 呈一串分布
+      let mesh = new THREE.Group();
+      let geom = new THREE.BoxGeometry(10, 10, 10);
+      let mat = new THREE.MeshPhongMaterial({ color: self.Colors.glod });
+      let randomSum = 3 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < randomSum; i++) {
+        let m = new THREE.Mesh(geom, mat);
+        m.rotation.x = 0.12 * Math.PI * 2;
+        m.rotation.y = 0.12 * Math.PI * 2;
+        m.position.x = i * 15 + Math.random() * 15;
+        m.rotation.y = 15 + Math.random() * 15;
+        m.scale.set(0.5, 0.5, 0.5);
+        m.castShadow = true;
+        m.receiveShadow = true;
+        mesh.add(m);
+      }
+      return mesh;
     },
   },
 };
