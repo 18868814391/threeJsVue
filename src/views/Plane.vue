@@ -15,6 +15,7 @@ export default {
       Ocean: "",
       Sky: "",
       Airplane: "",
+      mousePos: { x: 0, y: 0 },
       Colors: {
         red: 0xf25346,
         white: 0xd8d0d1,
@@ -46,6 +47,9 @@ export default {
       this.createPlane();
       self.scene.add(self.Airplane);
       this.renderer.render(self.scene, self.camera);
+
+      document.addEventListener("mousemove", this.handleMouseMove, false);
+
       this.animaLoop();
     },
     createScene() {
@@ -134,13 +138,13 @@ export default {
       // 参数为：顶面半径，底面半径，高度，半径分段，高度分段
       let geom = new THREE.CylinderGeometry(600, 600, 800, 40, 10, false);
       // 在 x 轴旋转几何体
-      geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+      geom.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
       // 创建材质
       let mat = new THREE.MeshPhongMaterial({
         color: self.Colors.blue,
         transparent: true,
         opacity: 0.6,
-        shading: THREE.FlatShading,
+        flatShading: THREE.FlatShading,
       });
       this.Ocean = new THREE.Mesh(geom, mat);
       this.Ocean.receiveShadow = true;
@@ -220,7 +224,7 @@ export default {
       let geomCockpit = new THREE.BoxGeometry(60, 50, 50, 1, 1);
       let matCockpit = new THREE.MeshPhongMaterial({
         color: self.Colors.red,
-        shading: THREE.FlatShading,
+        flatShading: THREE.FlatShading,
       });
       let cockPit = new THREE.Mesh(geomCockpit, matCockpit);
       cockPit.castShadow = true;
@@ -230,7 +234,7 @@ export default {
       let geomEngine = new THREE.BoxGeometry(20, 50, 50, 1, 1, 1);
       let matEngine = new THREE.MeshPhongMaterial({
         color: self.Colors.white,
-        shading: THREE.FlatShading,
+        flatShading: THREE.FlatShading,
       });
       let engine = new THREE.Mesh(geomEngine, matEngine);
       engine.position.x = 40;
@@ -241,7 +245,7 @@ export default {
       let geomTailPlane = new THREE.BoxGeometry(15, 20, 5, 1, 1, 1);
       let matTailPlane = new THREE.MeshPhongMaterial({
         color: self.Colors.red,
-        shading: THREE.FlatShading,
+        flatShading: THREE.FlatShading,
       });
       let tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
       tailPlane.position.set(-35, 25, 0);
@@ -252,7 +256,7 @@ export default {
       let geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
       let matSideWing = new THREE.MeshPhongMaterial({
         color: self.Colors.red,
-        shading: THREE.FlatShading,
+        flatShading: THREE.FlatShading,
       });
       let sideWing = new THREE.Mesh(geomSideWing, matSideWing);
       sideWing.castShadow = true;
@@ -262,7 +266,7 @@ export default {
       let geomPropeller = new THREE.BoxGeometry(20, 10, 10, 1, 1, 1);
       let matPropeller = new THREE.MeshPhongMaterial({
         color: self.Colors.brown,
-        shading: THREE.FlatShading,
+        flatShading: THREE.FlatShading,
       });
       let propeller = new THREE.Mesh(geomPropeller, matPropeller);
       propeller.castShadow = true;
@@ -271,7 +275,7 @@ export default {
       let geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
       let matBlade = new THREE.MeshPhongMaterial({
         color: self.Colors.brownDark,
-        shading: THREE.FlatShading,
+        flatShading: THREE.FlatShading,
       });
       let blade = new THREE.Mesh(geomBlade, matBlade);
       blade.position.set(8, 0, 0);
@@ -291,8 +295,42 @@ export default {
       this.Airplane.children[4].rotation.x += 0.3;
       this.Ocean.rotation.z += 0.005;
       this.Sky.rotation.z += 0.01;
+      this.movePlane();
       this.renderer.render(self.scene, self.camera);
       requestAnimationFrame(this.animaLoop);
+    },
+    handleMouseMove(event) {
+      // 这里我把接收到的鼠标位置的值转换成归一化值，在-1与1之间变化
+      let tx = -1 + (event.clientX / this.WIDTH) * 2;
+      // 对于 y 轴，我们需要一个逆公式
+      // 因为 2D 的 y 轴与 3D 的 y 轴方向相反
+      let ty = 1 - (event.clientY / this.HEIGHT) * 2;
+      this.mousePos = { x: tx, y: ty };
+    },
+    movePlane() {
+      const self = this;
+      // 在x轴上-100至100之间和y轴25至175之间移动飞机
+      // 根据鼠标的位置在-1与1之间的范围，使用的 normalize 函数实现（如下）
+      let targetX = this.normalize(self.mousePos.x, -0.75, 0.75, -100, 100);
+      let targetY = this.normalize(self.mousePos.y, -0.75, 0.75, 25, 175);
+      // 更新飞机的位置
+      // this.Airplane.position.y = targetY;
+      // this.Airplane.position.x = targetX;
+
+      // 在每帧通过添加剩余距离的一小部分值移动飞机
+      this.Airplane.position.y += (targetY - this.Airplane.position.y) * 0.1;
+      this.Airplane.position.x += (targetX - this.Airplane.position.x) * 0.1;
+      // 剩余距离按比例转动飞机
+      this.Airplane.rotation.z = (targetY - this.Airplane.position.y) * 0.0128;
+      this.Airplane.rotation.x = (this.Airplane.position.y - targetY) * 0.0064;
+    },
+    normalize(v, vmin, vmax, tmin, tmax) {
+      let nv = Math.max(Math.min(v, vmax), vmin);
+      let dv = vmax - vmin;
+      let pc = (nv - vmin) / dv;
+      let dt = tmax - tmin;
+      let tv = tmin + pc * dt;
+      return tv;
     },
   },
 };
