@@ -13,6 +13,8 @@ export default {
       HEIGHT: "",
       WIDTH: "",
       Ocean: "",
+      Sky: "",
+      Airplane: "",
       Colors: {
         red: 0xf25346,
         white: 0xd8d0d1,
@@ -39,9 +41,12 @@ export default {
       this.createLights();
       this.createSea();
       self.scene.add(self.Ocean);
-      let sky = this.createSky();
-      self.scene.add(sky);
+      this.createSky();
+      self.scene.add(self.Sky);
+      this.createPlane();
+      self.scene.add(self.Airplane);
       this.renderer.render(self.scene, self.camera);
+      this.animaLoop();
     },
     createScene() {
       const self = this;
@@ -65,9 +70,9 @@ export default {
         self.farPlane
       );
       // 设置相机的位置
-      this.camera.position.x = 0;
-      this.camera.position.z = 200;
-      this.camera.position.y = 100;
+      this.camera.position.x = 0; // 0
+      this.camera.position.z = 200; // 200
+      this.camera.position.y = 100; // 100
       // 创建渲染器
       this.renderer = new THREE.WebGLRenderer({
         // 在 css 中设置背景色透明显示渐变色
@@ -188,7 +193,7 @@ export default {
         // 设置每朵云的旋转角度和位置
         // 因此我们使用了一点三角函数
         let a = stepAngle * i; // 这是云的最终角度
-        let h = 750 + Math.random() * 200; // 这是轴的中心和云本身之间的距离
+        let h = 750 + Math.random() * 100 + 100; // 这是轴的中心和云本身之间的距离
         // 三角函数！！！希望你还记得数学学过的东西 :)
         // 假如你不记得:
         // 我们简单地把极坐标转换成笛卡坐标
@@ -204,7 +209,90 @@ export default {
         // 不要忘记将每朵云的网格添加到场景中
         mesh.add(c);
       }
-      return mesh;
+      this.Sky = mesh;
+      this.Sky.position.y = -700;
+    },
+    createPlane() {
+      const self = this;
+      // 创建一个空的容器
+      let mesh = new THREE.Group();
+      // 创建机舱
+      let geomCockpit = new THREE.BoxGeometry(60, 50, 50, 1, 1);
+      let matCockpit = new THREE.MeshPhongMaterial({
+        color: self.Colors.red,
+        shading: THREE.FlatShading,
+      });
+      let cockPit = new THREE.Mesh(geomCockpit, matCockpit);
+      cockPit.castShadow = true;
+      cockPit.receiveShadow = true;
+      mesh.add(cockPit);
+      // 创建引擎
+      let geomEngine = new THREE.BoxGeometry(20, 50, 50, 1, 1, 1);
+      let matEngine = new THREE.MeshPhongMaterial({
+        color: self.Colors.white,
+        shading: THREE.FlatShading,
+      });
+      let engine = new THREE.Mesh(geomEngine, matEngine);
+      engine.position.x = 40;
+      engine.castShadow = true;
+      engine.receiveShadow = true;
+      mesh.add(engine);
+      // 创建机尾
+      let geomTailPlane = new THREE.BoxGeometry(15, 20, 5, 1, 1, 1);
+      let matTailPlane = new THREE.MeshPhongMaterial({
+        color: self.Colors.red,
+        shading: THREE.FlatShading,
+      });
+      let tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
+      tailPlane.position.set(-35, 25, 0);
+      tailPlane.castShadow = true;
+      tailPlane.receiveShadow = true;
+      mesh.add(tailPlane);
+      // 创建机翼
+      let geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
+      let matSideWing = new THREE.MeshPhongMaterial({
+        color: self.Colors.red,
+        shading: THREE.FlatShading,
+      });
+      let sideWing = new THREE.Mesh(geomSideWing, matSideWing);
+      sideWing.castShadow = true;
+      sideWing.receiveShadow = true;
+      mesh.add(sideWing);
+      // 创建螺旋桨
+      let geomPropeller = new THREE.BoxGeometry(20, 10, 10, 1, 1, 1);
+      let matPropeller = new THREE.MeshPhongMaterial({
+        color: self.Colors.brown,
+        shading: THREE.FlatShading,
+      });
+      let propeller = new THREE.Mesh(geomPropeller, matPropeller);
+      propeller.castShadow = true;
+      propeller.receiveShadow = true;
+      // 创建螺旋桨桨叶
+      let geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
+      let matBlade = new THREE.MeshPhongMaterial({
+        color: self.Colors.brownDark,
+        shading: THREE.FlatShading,
+      });
+      let blade = new THREE.Mesh(geomBlade, matBlade);
+      blade.position.set(8, 0, 0);
+      blade.castShadow = true;
+      blade.receiveShadow = true;
+
+      propeller.add(blade);
+      propeller.position.set(50, 0, 0);
+      mesh.add(propeller);
+      mesh.scale.set(0.25, 0.25, 0.25);
+      mesh.position.y = 100;
+      this.Airplane = mesh;
+    },
+    animaLoop() {
+      // 整体旋转
+      const self = this;
+      this.Airplane.children[4].rotation.x += 0.3;
+      this.Ocean.rotation.z += 0.005;
+      this.Sky.rotation.z += 0.01;
+      this.renderer.render(self.scene, self.camera);
+      requestAnimationFrame(this.animaLoop);
     },
   },
 };
