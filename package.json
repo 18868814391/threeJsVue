@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "cannon": "^0.6.2",
     "core-js": "^3.6.5",
     "three": "^0.130.1",
     "three-css2drender": "^1.0.0",

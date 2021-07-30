@@ -167,15 +167,26 @@ export default {
       ball1.position.z = 0;
       tower.add(ball1);
       let pillar_1 = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.5, 0.5, 15),
+        new THREE.CylinderGeometry(0.8, 0.8, 22),
         material
       );
-      let axis = new THREE.Vector3(0, 2, 0); // 向量axis
-      pillar_1.rotateOnAxis(axis, Math.PI / 8);
+      let axis = new THREE.Vector3(20, 0, 20); // 向量axis
+      let rotWorldMatrix = new THREE.Matrix4(); // 创建一个4*4矩阵
+      rotWorldMatrix.makeRotationAxis(axis.normalize(), (30 * Math.PI) / 180);
 
-      pillar_1.position.y = 20;
-      pillar_1.position.x = 20;
-      pillar_1.position.z = 0;
+      rotWorldMatrix.multiply(pillar_1.matrix);
+      pillar_1.matrix = rotWorldMatrix;
+      pillar_1.rotation.setFromRotationMatrix(pillar_1.matrix);
+      // pillar_1.translateOnAxis(axis, 20);
+      // pillar_1.rotation.set(
+      //   (Math.PI / 2) * 1.15,
+      //   (Math.PI / 5.5) * 1.5,
+      //   (-Math.PI / 2.5) * 1.1
+      // );
+      pillar_1.position.y = 12;
+      pillar_1.position.x = 7;
+      pillar_1.position.z = -7;
+
       tower.add(pillar_1);
       this.scene.add(tower);
     },

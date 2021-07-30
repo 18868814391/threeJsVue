@@ -31,6 +31,12 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/Shanghai.vue"),
   },
+  {
+    path: "/phy",
+    name: "Phy",
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/Physics/Phy.vue"),
+  },
 ];
 
 const router = new VueRouter({
