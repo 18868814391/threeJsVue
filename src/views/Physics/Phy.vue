@@ -28,7 +28,6 @@ export default {
     this.stats = new Stats();
     this.$refs.shanghai.appendChild(this.stats.dom);
     this.initWorld();
-    console.log("CANNON", CANNON);
   },
   methods: {
     initWorld() {
