@@ -167,27 +167,28 @@ export default {
       ball1.position.z = 0;
       tower.add(ball1);
       let pillar_1 = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.8, 0.8, 22),
+        new THREE.CylinderGeometry(0.8, 0.8, 30),
         material
       );
-      let axis = new THREE.Vector3(20, 0, 20); // 向量axis
-      let rotWorldMatrix = new THREE.Matrix4(); // 创建一个4*4矩阵
-      rotWorldMatrix.makeRotationAxis(axis.normalize(), (30 * Math.PI) / 180);
+      let axis = new THREE.Vector3(0, 1, 0); // 向量axis
+      pillar_1.rotateOnAxis(axis, Math.PI / 8); // 绕axis轴旋转π/8
+      // pillar_1.rotation.set((30 * Math.PI) / 180, 0, 0);
+      pillar_1.position.set(3.5, 12, -7);
+      let pillar_2 = pillar_1.clone();
+      pillar_2.rotation.set(
+        -(15 * Math.PI) / 180,
+        -(30 * Math.PI) / 180,
+        (10 * Math.PI) / 180
+      );
+      pillar_2.position.set(3.5, 12, 7);
 
-      rotWorldMatrix.multiply(pillar_1.matrix);
-      pillar_1.matrix = rotWorldMatrix;
-      pillar_1.rotation.setFromRotationMatrix(pillar_1.matrix);
-      // pillar_1.translateOnAxis(axis, 20);
-      // pillar_1.rotation.set(
-      //   (Math.PI / 2) * 1.15,
-      //   (Math.PI / 5.5) * 1.5,
-      //   (-Math.PI / 2.5) * 1.1
-      // );
-      pillar_1.position.y = 12;
-      pillar_1.position.x = 7;
-      pillar_1.position.z = -7;
+      let pillar_3 = pillar_1.clone();
+      pillar_3.rotation.set(0, 0, -(30 * Math.PI) / 180);
+      pillar_3.position.set(-7, 12, 0);
 
       tower.add(pillar_1);
+      tower.add(pillar_2);
+      tower.add(pillar_3);
       this.scene.add(tower);
     },
   },

@@ -154,12 +154,12 @@ export default {
       this.scene.add(bottle);
 
       let bodyBox = new CANNON.Body({
-        mass: 1,
+        mass: 2,
         position: new CANNON.Vec3(0, 2.5, -15),
-        shape: new CANNON.Box(new CANNON.Vec3(2.5, 2.5, 2.5)),
+        shape: new CANNON.Box(new CANNON.Vec3(3, 3, 3)),
         material: new CANNON.Material({ friction: 0.1, restitution: 0 }),
       }); // 创建一个质量为1kg，位置为（x,20,z），形状为halfSize为1,1,1的正方形刚体，材质中摩擦系数为0.1，弹性系数为0。
-      bodyBox.velocity.set(0, 0, 40); // 这里要注意velocity属性可以刚体带有出速度
+      bodyBox.velocity.set(0, 0, 80); // 这里要注意velocity属性可以刚体带有出速度
       bottle.userData = bodyBox; // 给box的userData属性添加刚体数据
       this.world.addBody(bodyBox); // 在物理世界中添加该刚体
     },
