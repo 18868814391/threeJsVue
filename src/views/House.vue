@@ -23,7 +23,7 @@ export default {
       this.scene = new THREE.Scene();
 
       const texture = new THREE.TextureLoader().load(
-        "https://qhyxpicoss.kujiale.com/r/2019/07/01/L3D137S8ENDIADDWAYUI5L7GLUF3P3WS888_3000x4000.jpg?x-oss-process=image/resize,m_fill,w_1600,h_920/format,webp"
+        require("../assets/qqq.jpg")
       );
       const geometry = new THREE.SphereGeometry(50, 256, 256);
       const material = new THREE.MeshBasicMaterial({ map: texture });

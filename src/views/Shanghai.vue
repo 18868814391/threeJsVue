@@ -166,14 +166,16 @@ export default {
       ball1.position.x = 0;
       ball1.position.z = 0;
       tower.add(ball1);
+
       let pillar_1 = new THREE.Mesh(
         new THREE.CylinderGeometry(0.8, 0.8, 30),
         material
       );
-      let axis = new THREE.Vector3(0, 1, 0); // 向量axis
+      let axis = new THREE.Vector3(1.2, 1, 1); // 向量axis
       pillar_1.rotateOnAxis(axis, Math.PI / 8); // 绕axis轴旋转π/8
       // pillar_1.rotation.set((30 * Math.PI) / 180, 0, 0);
       pillar_1.position.set(3.5, 12, -7);
+
       let pillar_2 = pillar_1.clone();
       pillar_2.rotation.set(
         -(15 * Math.PI) / 180,
@@ -188,7 +190,7 @@ export default {
 
       tower.add(pillar_1);
       tower.add(pillar_2);
-      tower.add(pillar_3);
+      // tower.add(pillar_3);
       this.scene.add(tower);
     },
   },
