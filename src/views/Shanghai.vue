@@ -133,6 +133,7 @@ export default {
       // const self=this;
       let tower = new THREE.Group();
       let material = new THREE.MeshLambertMaterial({ color: "#666" });
+      // 基座1.2
       let base = new THREE.Mesh(
         new THREE.CylinderGeometry(10, 10, 1),
         material
@@ -142,7 +143,7 @@ export default {
       let base2 = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 1), material);
       base2.position.y = 1;
       tower.add(base2);
-
+      // 底面立柱1 2 3
       let pillar1 = new THREE.Mesh(
         new THREE.CylinderGeometry(1, 1, 15),
         material
@@ -161,36 +162,57 @@ export default {
       tower.add(pillar1);
       tower.add(pillar2);
       tower.add(pillar3);
+      // 底部大球
       let ball1 = new THREE.Mesh(new THREE.SphereGeometry(7, 10, 10), material);
       ball1.position.y = 20;
       ball1.position.x = 0;
       ball1.position.z = 0;
       tower.add(ball1);
-
+      // 底面斜柱1 2 3
       let pillar_1 = new THREE.Mesh(
         new THREE.CylinderGeometry(0.8, 0.8, 30),
         material
       );
+      let pillar_2 = pillar_1.clone();
+      let pillar_3 = pillar_1.clone();
       let axis = new THREE.Vector3(1.2, 1, 1); // 向量axis
       pillar_1.rotateOnAxis(axis, Math.PI / 8); // 绕axis轴旋转π/8
-      // pillar_1.rotation.set((30 * Math.PI) / 180, 0, 0);
       pillar_1.position.set(3.5, 12, -7);
-
-      let pillar_2 = pillar_1.clone();
-      pillar_2.rotation.set(
-        -(15 * Math.PI) / 180,
-        -(30 * Math.PI) / 180,
-        (10 * Math.PI) / 180
-      );
+      let axis2 = new THREE.Vector3(1.2, 1, -1); // 向量axis
+      pillar_2.rotateOnAxis(axis2, -Math.PI / 8); // 绕axis轴旋转π/8
       pillar_2.position.set(3.5, 12, 7);
-
-      let pillar_3 = pillar_1.clone();
-      pillar_3.rotation.set(0, 0, -(30 * Math.PI) / 180);
+      let axis3 = new THREE.Vector3(0, 0, 1); // 向量axis
+      pillar_3.rotateOnAxis(axis3, -Math.PI / 6); // 绕axis轴旋转π/8
       pillar_3.position.set(-7, 12, 0);
-
       tower.add(pillar_1);
       tower.add(pillar_2);
-      // tower.add(pillar_3);
+      tower.add(pillar_3);
+      // 底面圆环
+      let circleGround = new THREE.Mesh(
+        new THREE.TorusGeometry(4, 1, 25, 80),
+        material
+      );
+      let axis_bc = new THREE.Vector3(1, 0, 0); // 向量axis
+      circleGround.rotateOnAxis(axis_bc, Math.PI / 2); // 绕axis轴旋转π/8
+      circleGround.position.set(0, 9, 0);
+      tower.add(circleGround);
+      // 底面斜支撑柱
+      let bt_pillar1 = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.8, 0.8, 6),
+        material
+      );
+      let bt_pillar2 = bt_pillar1.clone();
+      // let bt_pillar3 = bt_pillar1.clone();
+      let axis_btp1 = new THREE.Vector3(0, 0, 1); // 向量axis
+      bt_pillar1.rotateOnAxis(axis_btp1, Math.PI / 4); // 绕axis轴旋转π/8
+      bt_pillar1.position.set(-8, 3, 0);
+      let axis_btp2 = new THREE.Vector3(1.2, 0, 0.8); // 向量axis
+      bt_pillar2.rotateOnAxis(axis_btp2, -Math.PI / 8); // 绕axis轴旋转π/8
+      bt_pillar2.position.set(5, 3, -5);
+
+      tower.add(bt_pillar1);
+      tower.add(bt_pillar2);
+
       this.scene.add(tower);
     },
   },
