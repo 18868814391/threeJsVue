@@ -168,25 +168,6 @@ export default {
       ball1.position.x = 0;
       ball1.position.z = 0;
       tower.add(ball1);
-      // 底面斜柱1 2 3
-      let pillar_1 = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.8, 0.8, 30),
-        material
-      );
-      let pillar_2 = pillar_1.clone();
-      let pillar_3 = pillar_1.clone();
-      let axis = new THREE.Vector3(1.2, 1, 1); // 向量axis
-      pillar_1.rotateOnAxis(axis, Math.PI / 8); // 绕axis轴旋转π/8
-      pillar_1.position.set(3.5, 12, -7);
-      let axis2 = new THREE.Vector3(1.2, 1, -1); // 向量axis
-      pillar_2.rotateOnAxis(axis2, -Math.PI / 8); // 绕axis轴旋转π/8
-      pillar_2.position.set(3.5, 12, 7);
-      let axis3 = new THREE.Vector3(0, 0, 1); // 向量axis
-      pillar_3.rotateOnAxis(axis3, -Math.PI / 6); // 绕axis轴旋转π/8
-      pillar_3.position.set(-7, 12, 0);
-      tower.add(pillar_1);
-      tower.add(pillar_2);
-      tower.add(pillar_3);
       // 底面圆环
       let circleGround = new THREE.Mesh(
         new THREE.TorusGeometry(4, 1, 25, 80),
@@ -195,24 +176,113 @@ export default {
       let axis_bc = new THREE.Vector3(1, 0, 0); // 向量axis
       circleGround.rotateOnAxis(axis_bc, Math.PI / 2); // 绕axis轴旋转π/8
       circleGround.position.set(0, 9, 0);
-      tower.add(circleGround);
+      tower.add(circleGround);      
+      // 底面斜柱1 2 3
+      let pillar_1 = new THREE.Mesh(
+        new THREE.CylinderGeometry(1, 1, 30),
+        material
+      );
+      let pillar_2 = pillar_1.clone();
+      let pillar_3 = pillar_1.clone();
+      pillar_1.position.set(3.5, 12, -3.5/Math.cos(Math.PI/ 3));
+      let axis = new THREE.Vector3(1*Math.cos(Math.PI / 6), 0, 1*Math.sin(Math.PI / 6)); // 向量axis
+      pillar_1.rotateOnAxis(axis, Math.PI / 6); // 绕axis轴旋转π/8
+      pillar_2.position.set(3.5, 12, 3.5/Math.cos(Math.PI / 3));
+      let axis2 = new THREE.Vector3(1*Math.cos(Math.PI / 6), 0, -1*Math.sin(Math.PI / 6)); // 向量axis
+      pillar_2.rotateOnAxis(axis2, -Math.PI / 6); // 绕axis轴旋转π/8
+      pillar_3.position.set(-3.5/Math.cos(Math.PI / 3), 12, 0);
+      let axis3 = new THREE.Vector3(0, 0, 1); // 向量axis
+      pillar_3.rotateOnAxis(axis3, -Math.PI / 6); // 绕axis轴旋转π/8
+      tower.add(pillar_1);
+      tower.add(pillar_2);
+      tower.add(pillar_3);
       // 底面斜支撑柱
       let bt_pillar1 = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.8, 0.8, 6),
+        new THREE.CylinderGeometry(0.8, 0.8, 12),
         material
       );
       let bt_pillar2 = bt_pillar1.clone();
-      // let bt_pillar3 = bt_pillar1.clone();
+      let bt_pillar3 = bt_pillar1.clone();
+      bt_pillar1.position.set(-6, 3, 0);  
       let axis_btp1 = new THREE.Vector3(0, 0, 1); // 向量axis
-      bt_pillar1.rotateOnAxis(axis_btp1, Math.PI / 4); // 绕axis轴旋转π/8
-      bt_pillar1.position.set(-8, 3, 0);
-      let axis_btp2 = new THREE.Vector3(1.2, 0, 0.8); // 向量axis
-      bt_pillar2.rotateOnAxis(axis_btp2, -Math.PI / 8); // 绕axis轴旋转π/8
-      bt_pillar2.position.set(5, 3, -5);
-
+      bt_pillar1.rotateOnAxis(axis_btp1, Math.PI / 4); // 绕axis轴旋转π/8          
+      bt_pillar2.position.set(6*Math.cos(Math.PI / 3), 3,-6*Math.sin(Math.PI / 3) );
+      let axis_btp2 = new THREE.Vector3(-1.2*Math.cos(Math.PI / 6), 0, -1*Math.sin(Math.PI / 6)); // 向量axis
+      bt_pillar2.rotateOnAxis(axis_btp2, Math.PI / 4); // 绕axis轴旋转π/8          
+      bt_pillar3.position.set(6*Math.cos(Math.PI / 3), 3,6*Math.sin(Math.PI / 3) );
+      let axis_btp3 = new THREE.Vector3(1.2*Math.cos(Math.PI / 6), 0, -1*Math.sin(Math.PI / 6)); // 向量axis
+      bt_pillar3.rotateOnAxis(axis_btp3, Math.PI / 4); // 绕axis轴旋转π/8           
       tower.add(bt_pillar1);
       tower.add(bt_pillar2);
-
+      tower.add(bt_pillar3);
+      // 中层立柱1 2 3
+      let pillar1_m = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.75, 0.75, 53),
+        material
+      );
+      pillar1_m.position.set(2.5,35,0)
+      let pillar2_m = pillar1_m.clone();
+      pillar2_m.position.set(-Math.cos(Math.PI / 2.5) * 3,35,-Math.sin(Math.PI / 2.5) * 3)
+      let pillar3_m = pillar1_m.clone();
+      pillar3_m.position.set(-Math.cos(Math.PI / 2.5) * 3,35,Math.sin(Math.PI / 2.5) * 3)
+      tower.add(pillar1_m);
+      tower.add(pillar2_m);
+      tower.add(pillar3_m);
+        // 中层圆环
+      let circleGround_m1 = new THREE.Mesh(
+        new THREE.TorusGeometry(2.5, 0.75, 25, 80),
+        material
+      );
+      let axis_bc_m1 = new THREE.Vector3(1, 0, 0); // 向量axis
+      circleGround_m1.rotateOnAxis(axis_bc_m1, Math.PI / 2); // 绕axis轴旋转π/8
+      circleGround_m1.position.set(0, 33, 0);
+      let circleGround_m2 = circleGround_m1.clone();
+      circleGround_m2.position.set(0, 40, 0);
+      let circleGround_m3 = circleGround_m1.clone();
+      circleGround_m3.position.set(0, 47, 0);
+      let circleGround_m4 = circleGround_m1.clone();
+      circleGround_m4.position.set(0, 54, 0);
+      tower.add(circleGround_m1);
+      tower.add(circleGround_m2);
+      tower.add(circleGround_m3);
+      tower.add(circleGround_m4);
+      // 中层圆厅
+      let ball_m1 = new THREE.Mesh(new THREE.SphereGeometry(2.5, 10, 10), material);
+      ball_m1.position.set(0,33,0)
+      let ball_m2=ball_m1.clone();
+      ball_m2.position.set(0,40,0)
+      let ball_m3=ball_m1.clone();
+      ball_m3.position.set(0,47,0)
+      let ball_m4=ball_m1.clone();
+      ball_m4.position.set(0,54,0)      
+      tower.add(ball_m1);      
+      tower.add(ball_m2);
+      tower.add(ball_m3);  
+      tower.add(ball_m4); 
+      // 中层大球
+      let ball2 = new THREE.Mesh(new THREE.SphereGeometry(4.5, 10, 10), material);
+      ball2.position.set(0,63,0)      
+      tower.add(ball2); 
+      // 三层立柱
+      let pillar_top = new THREE.Mesh(
+        new THREE.CylinderGeometry(1, 1, 10),
+        material
+      );
+      pillar_top.position.set(0,70,0)      
+      tower.add(pillar_top); 
+      // 顶部小球
+      let ball3 = new THREE.Mesh(new THREE.SphereGeometry(2, 10, 10), material);
+      ball3.position.set(0,75,0)      
+      tower.add(ball3); 
+      // 最顶部立柱
+      let pillar_ttop = new THREE.Mesh(
+        new THREE.CylinderGeometry(0, 10, 250, 5, 5),
+        material
+      );
+      pillar_ttop.scale.set(0.1,0.1,0.1)
+      pillar_ttop.position.set(0,85,0)
+      tower.add(pillar_ttop); 
+      tower.scale.set(0.2,0.2,0.2)
       this.scene.add(tower);
     },
   },
