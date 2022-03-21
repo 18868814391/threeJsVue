@@ -38,6 +38,8 @@ export default {
       this.groundBehind();
       this.groundFront();
       this.tower();
+      this.getShanghaiTower()
+      // this.getGlobalFinancialCenterBottom()
       this.initRender();
     },
     initLight(intensity) {
@@ -282,9 +284,106 @@ export default {
       pillar_ttop.scale.set(0.1,0.1,0.1)
       pillar_ttop.position.set(0,85,0)
       tower.add(pillar_ttop); 
-      tower.scale.set(0.2,0.2,0.2)
+      tower.scale.set(0.3,0.3,0.3)
       this.scene.add(tower);
     },
+    getShanghaiTower() {
+    // 1. 通过 THREE.CylinderGeometry 生成一个圆柱体 注意参数
+      let _geometry = new THREE.CylinderGeometry(2, 3, 18, 7, 50);
+    // 2. 操作该圆柱的顶点， 通过正弦函数规律性的变化 使其网格发生变化
+      // _geometry.vertices.forEach((vertex, ind) => {
+      //   // 正弦函数规律性的改变顶点坐标的x轴和z轴
+      //   vertex.z = vertex.z + Math.sin((vertex.y + ind) * 0.015);
+      //   vertex.x = vertex.x + Math.sin((vertex.y + ind) * 0.01) * 1;
+      //   if (vertex.y >= 8.5) {
+      //     // 3. 这里做了一个斜塔尖 
+      //     vertex.y -= vertex.x * 0.2;
+      //   }
+      // });
+    // 4. 改变顶点后别忘记了让网格的verticesNeedUpdate等于true
+      // _geometry.verticesNeedUpdate = true;
+      let len=_geometry.attributes.position.count
+      let arr=_geometry.attributes.position.array
+      for(let i=0;i<len;i++){
+        let x=arr[i*3]
+        let y=arr[i*3+1]
+        let z=arr[i*3+2]
+        _geometry.attributes.position.setXYZ( i, x + Math.sin((y + i) * 0.01) * 1, y,z + Math.sin((y + i) * 0.015));
+      }
+      _geometry.attributes.position.needsUpdate = true;  
+
+      let _material = new THREE.MeshPhongMaterial({
+        color: "rgb(120, 120, 120)"
+        // wireframe: true
+      });
+      let tower = new THREE.Mesh(_geometry, _material);
+      tower.position.set(10, 17, -8); // 位置
+      tower.scale.set(1, 2, 0.5); // 缩放
+      this.scene.add(tower);
+    },
+    getGlobalFinancialCenterBottom() {
+    // 1. 手写几何体的每个顶点坐标 
+    console.log('new THREE.Vector3',new THREE.Vector3)
+    console.log('new THREE.Face3',new THREE.Face3)
+      let vertices = [
+        // 底部
+        new THREE.Vector3(3, 0, 3), // 下标0
+        new THREE.Vector3(3, 0, -3), // 下标1
+        new THREE.Vector3(-3, 0, 3), // 下标2
+        new THREE.Vector3(-3, 0, -3), // 下标3
+        // 中部
+        new THREE.Vector3(3, 10, 3), // 下标4
+        new THREE.Vector3(-3, 10, -3), // 下标5
+        // 上部
+        new THREE.Vector3(-1.5, 30, 3), // 下标6
+        new THREE.Vector3(3, 30, -1.5), // 下标7
+        new THREE.Vector3(3, 30, -3), // 下标8
+        new THREE.Vector3(1.5, 30, -3), // 下标9
+        new THREE.Vector3(-3, 30, 1.5), // 下标10
+        new THREE.Vector3(-3, 30, 3) // 下标11
+      ]; // 顶点坐标，一共8个顶点
+
+      let faces = [
+        // 底部2个三角形
+        new THREE.Face3(0, 1, 2),
+        new THREE.Face3(3, 2, 1),
+        // 每个面的 3个三角形
+        // 1.
+        new THREE.Face3(6, 2, 0),
+        new THREE.Face3(0, 4, 6),
+        new THREE.Face3(11, 2, 6),
+        // 2.
+        new THREE.Face3(0, 1, 7),
+        new THREE.Face3(7, 4, 0),
+        new THREE.Face3(8, 7, 1),
+        // 3.
+        new THREE.Face3(1, 3, 9),
+        new THREE.Face3(9, 8, 1),
+        new THREE.Face3(3, 5, 9),
+        // 4.
+        new THREE.Face3(10, 3, 2),
+        new THREE.Face3(11, 10, 2),
+        new THREE.Face3(10, 5, 3),
+        // 顶部4个三角形
+        new THREE.Face3(6, 10, 11),
+        new THREE.Face3(7, 8, 9),
+        new THREE.Face3(6, 7, 10),
+        new THREE.Face3(7, 9, 10),
+        // 两个剖面 三角形
+        new THREE.Face3(7, 6, 4),
+        new THREE.Face3(10, 9, 5)
+      ]; // 顶点索引，每一个面都会根据顶点索引的顺序去绘制线条
+      let globalGeometry_bottom = new THREE.Geometry();
+      globalGeometry_bottom.vertices = vertices;
+      globalGeometry_bottom.faces = faces;
+      globalGeometry_bottom.computeFaceNormals(); // 计算法向量，会对光照产生影响
+      let _material = new THREE.MeshPhongMaterial({
+        color: "rgb(120, 120, 120)"
+        // wireframe: true
+      });
+      let globalFinancialCenter = new THREE.Mesh(globalGeometry_bottom, _material);
+      this.scene.add(globalFinancialCenter);
+    }
   },
 };
 </script>
