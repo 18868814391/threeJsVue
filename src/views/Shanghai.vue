@@ -39,7 +39,7 @@ export default {
       this.groundFront();
       this.tower();
       this.getShanghaiTower()
-      // this.getGlobalFinancialCenterBottom()
+      this.getGlobalFinancialCenterBottom()
       this.initRender();
     },
     initLight(intensity) {
@@ -323,17 +323,15 @@ export default {
     },
     getGlobalFinancialCenterBottom() {
     // 1. 手写几何体的每个顶点坐标 
-    console.log('new THREE.Vector3',new THREE.Vector3)
-    console.log('new THREE.Face3',new THREE.Face3)
       let vertices = [
         // 底部
         new THREE.Vector3(3, 0, 3), // 下标0
         new THREE.Vector3(3, 0, -3), // 下标1
         new THREE.Vector3(-3, 0, 3), // 下标2
-        new THREE.Vector3(-3, 0, -3), // 下标3
         // 中部
+        new THREE.Vector3(-3, 0, -3), // 下标3
         new THREE.Vector3(3, 10, 3), // 下标4
-        new THREE.Vector3(-3, 10, -3), // 下标5
+        new THREE.Vector3(-3, 20, -3), // 下标5
         // 上部
         new THREE.Vector3(-1.5, 30, 3), // 下标6
         new THREE.Vector3(3, 30, -1.5), // 下标7
@@ -343,45 +341,50 @@ export default {
         new THREE.Vector3(-3, 30, 3) // 下标11
       ]; // 顶点坐标，一共8个顶点
 
-      let faces = [
-        // 底部2个三角形
-        new THREE.Face3(0, 1, 2),
-        new THREE.Face3(3, 2, 1),
-        // 每个面的 3个三角形
-        // 1.
-        new THREE.Face3(6, 2, 0),
-        new THREE.Face3(0, 4, 6),
-        new THREE.Face3(11, 2, 6),
-        // 2.
-        new THREE.Face3(0, 1, 7),
-        new THREE.Face3(7, 4, 0),
-        new THREE.Face3(8, 7, 1),
-        // 3.
-        new THREE.Face3(1, 3, 9),
-        new THREE.Face3(9, 8, 1),
-        new THREE.Face3(3, 5, 9),
-        // 4.
-        new THREE.Face3(10, 3, 2),
-        new THREE.Face3(11, 10, 2),
-        new THREE.Face3(10, 5, 3),
-        // 顶部4个三角形
-        new THREE.Face3(6, 10, 11),
-        new THREE.Face3(7, 8, 9),
-        new THREE.Face3(6, 7, 10),
-        new THREE.Face3(7, 9, 10),
-        // 两个剖面 三角形
-        new THREE.Face3(7, 6, 4),
-        new THREE.Face3(10, 9, 5)
-      ]; // 顶点索引，每一个面都会根据顶点索引的顺序去绘制线条
-      let globalGeometry_bottom = new THREE.Geometry();
-      globalGeometry_bottom.vertices = vertices;
-      globalGeometry_bottom.faces = faces;
+      // let faces = [
+      //   // 底部2个三角形
+      //   new THREE.Face3(0, 1, 2),
+      //   new THREE.Face3(3, 2, 1),
+      //   // 每个面的 3个三角形
+      //   // 1.
+      //   new THREE.Face3(6, 2, 0),
+      //   new THREE.Face3(0, 4, 6),
+      //   new THREE.Face3(11, 2, 6),
+      //   // 2.
+      //   new THREE.Face3(0, 1, 7),
+      //   new THREE.Face3(7, 4, 0),
+      //   new THREE.Face3(8, 7, 1),
+      //   // 3.
+      //   new THREE.Face3(1, 3, 9),
+      //   new THREE.Face3(9, 8, 1),
+      //   new THREE.Face3(3, 5, 9),
+      //   // 4.
+      //   new THREE.Face3(10, 3, 2),
+      //   new THREE.Face3(11, 10, 2),
+      //   new THREE.Face3(10, 5, 3),
+      //   // 顶部4个三角形
+      //   new THREE.Face3(6, 10, 11),
+      //   new THREE.Face3(7, 8, 9),
+      //   new THREE.Face3(6, 7, 10),
+      //   new THREE.Face3(7, 9, 10),
+      //   // 两个剖面 三角形
+      //   new THREE.Face3(7, 6, 4),
+      //   new THREE.Face3(10, 9, 5)
+      // ]; // 顶点索引，每一个面都会根据顶点索引的顺序去绘制线条
+      // let globalGeometry_bottom = new THREE.Geometry();
+      // globalGeometry_bottom.vertices = vertices;
+      let globalGeometry_bottom = new THREE.BufferGeometry()
+      globalGeometry_bottom.computeFaceNormals(); // 计算法向量，会对光照产生影响
+      globalGeometry_bottom.setFromPoints(vertices)
+      // globalGeometry_bottom.faces = faces;
       globalGeometry_bottom.computeFaceNormals(); // 计算法向量，会对光照产生影响
       let _material = new THREE.MeshPhongMaterial({
-        color: "rgb(120, 120, 120)"
-        // wireframe: true
+        color: "rgb(120, 120, 120)",
+        side: THREE.DoubleSide // 双面渲染
+        // wireframe: true // 线框
       });
       let globalFinancialCenter = new THREE.Mesh(globalGeometry_bottom, _material);
+      globalFinancialCenter.position.set(0, 0, 0); // 位置
       this.scene.add(globalFinancialCenter);
     }
   },
