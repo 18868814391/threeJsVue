@@ -436,34 +436,31 @@ export default {
     // },
     getGlobalFinancialCenterBottom() {
       let position = new Float32Array([
-        0,0,0,10,10,0,10,0,0,
-        0,0,0,0,10,0,10,10,0,
-        0,0,0,0,10,0,0,0,10,
-        0,10,0,0,0,10,0,10,10,
-        0,0,0,10,0,0,0,0,10,
-        10,0,0,10,0,10,0,0,10,
-        0,10,0,10,10,0,0,10,10,
-        10,10,0,10,10,10,0,10,10,
-        0,0,0,0,10,0,10,10,0,
-        0,0,0,10,0,0,10,10,0,
-        0,10,10,0,0,10,10,10,10,
-        0,0,10,10,0,10,10,10,10
-        
+        0, 0, 0, 10, 10, 0, 10, 0, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0, 0, 0, 0,
+        10, 0, 0, 0, 10, 0, 10, 0, 0, 0, 10, 0, 10, 10, 0, 0, 0, 10, 0, 0, 0, 0,
+        10, 10, 0, 0, 10, 0, 10, 0, 0, 10, 0, 10, 0, 10, 10, 0, 0, 10, 10, 10,
+        10, 0, 10, 10, 10, 0, 10, 10, 10, 0, 0, 10, 10, 0, 10, 0, 10, 10, 10, 0,
+        10, 10, 10, 10, 0, 10, 0, 10, 10, 0, 0, 10, 10, 10, 10, 0, 0, 10, 10, 0,
+        10, 10, 10, 10,
       ]);
       // let colors = new Float32Array([
       //   1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1,
       // ]);
-      // let normals = new Float32Array([
-      //   0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0,
-      // ]);
+      let normals = new Float32Array([
+        0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, -1, 0, 0,
+        -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, -1, 0, 0, -1, 0, 0,
+        -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+        0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+        0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+      ]);
       let _geometry = new THREE.BufferGeometry();
       _geometry.attributes.position = new THREE.BufferAttribute(position, 3);
       // _geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-      // _geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
+      _geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
       // let indexs = new Uint16Array([0, 1, 2, 3, 4, 5, 2, 4, 5]);
       // _geometry.index = new THREE.BufferAttribute(indexs, 1);
-      let _material = new THREE.MeshBasicMaterial({
-        color: "rgb(120, 120, 120)",
+      let _material = new THREE.MeshPhongMaterial({
+        color: "#666",
         // vertexColors: THREE.VertexColors,
         side: THREE.DoubleSide, // 双面渲染
         // wireframe: true // 线框

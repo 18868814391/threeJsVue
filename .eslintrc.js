@@ -39,6 +39,7 @@ module.exports = {
     "template-curly-spacing": "off",
     "vue/no-confusing-v-for-v-if": "error",
     "vue/no-v-html": "error",
-    "linebreak-style":[0,'error','windows',]
+    "linebreak-style": [0, "error", "windows"],
+    "prettier/prettier": ["error", { endOfLine: "auto" }],
   },
 };
