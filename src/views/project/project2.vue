@@ -6,7 +6,7 @@
 import * as THREE from "three";
 import Stats from "../stats.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-// import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import makeCuboid from "../components/Cuboid.js";
 export default {
@@ -51,7 +51,7 @@ export default {
       light.shadow.bias = 0.001;
       light.shadow.mapSize.width = 2048;
       light.shadow.mapSize.height = 2048;
-      light.position.set(200, 200, 160);
+      light.position.set(100, 100, 80);
       this.scene.add(light);
     },
     initCamera() {
@@ -61,22 +61,21 @@ export default {
         1,
         1000
       );
-      this.camera.position.set(0, 60, 180);
+      this.camera.position.set(0, 30, 90);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     },
     loadGltf() {
       const self = this;
       const loader = new GLTFLoader();
-      // const dracoLoader = new DRACOLoader();
-      // dracoLoader.setDecoderPath("/gltf/");
-      // dracoLoader.setDecoderConfig({ type: "js" });
-      // dracoLoader.preload();
-      // loader.setDRACOLoader(dracoLoader);
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath("/gltf/");
+      dracoLoader.setDecoderConfig({ type: "js" });
+      dracoLoader.preload();
+      loader.setDRACOLoader(dracoLoader);
       let model = "";
-      loader.load("/module/Horse.glb", function (gltf) {
+      loader.load("/module/chair.glb", function (gltf) {
         console.log("gltf", gltf);
         model = gltf.scene;
-        model.position.set(0, 0, 0);
         self.scene.add(model);
         self.renderer.render(self.scene, self.camera);
       });
