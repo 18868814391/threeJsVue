@@ -374,7 +374,19 @@ export default {
       this.scene.add(globalFinancialCenter);
     },
     getFinancialCenter(){
-      let d=makeConvex([0, 0, 0,8, 0, 0,8, 0, 8,0, 0, 8,2,10,2,2.5,10,2.5,2.5,10,1.5,5.5,10,2.5,6,10,6,5.4,10,5.5,6,5,7,7,5,6])
+      let d=makeConvex([
+        0, 0, 0,8, 0, 0,8, 0, 8,0, 0, 8,
+        2,35,2,
+        2.1,35,2.8,
+        2.8,35,1.8,
+
+        6,35,6,
+        6.2,35,5.2,
+        5.4,35,6.2,
+
+        2.5,8,6,
+        6,8,2.5
+      ])
       this.scene.add(d[0]);   
       this.scene.add(d[1]); 
     }
