@@ -7,6 +7,7 @@ import * as THREE from "three";
 import Stats from "./stats.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import makeCuboid from "./components/Cuboid.js";
+import makeConvex from "./components/Convex.js"
 // import { Face3 } from "three/examples/jsm/deprecated/Geometry";
 export default {
   data() {
@@ -42,6 +43,7 @@ export default {
       this.tower();
       this.getShanghaiTower();
       this.getGlobalFinancialCenterBottom();
+      this.getFinancialCenter()
       this.initRender();
     },
     initLight(intensity) {
@@ -63,7 +65,7 @@ export default {
         1,
         1000
       );
-      this.camera.position.set(0, 30, 90);
+      this.camera.position.set(0, 30, 0);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     },
     initRender() {
@@ -371,6 +373,11 @@ export default {
       globalFinancialCenter.position.set(10, 10, 10); // 位置
       this.scene.add(globalFinancialCenter);
     },
+    getFinancialCenter(){
+      let d=makeConvex([0, 0, 0,8, 0, 0,8, 0, 8,0, 0, 8,2,10,2,2.5,10,2.5,2.5,10,1.5,5.5,10,2.5,6,10,6,5.4,10,5.5,6,5,7,7,5,6])
+      this.scene.add(d[0]);   
+      this.scene.add(d[1]); 
+    }
   },
 };
 </script>

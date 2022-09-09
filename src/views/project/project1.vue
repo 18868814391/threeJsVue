@@ -8,7 +8,9 @@ import Stats from "../stats.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 // import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry'
 import makeCuboid from "../components/Cuboid.js";
+import makeConvex from "../components/Convex.js"
 export default {
   data() {
     return {
@@ -38,12 +40,16 @@ export default {
       this.scene.add(gridHelper);
       this.initLight(1.2);
       this.initCamera();
-      this.getGlobalFinancialCenterBottom();
-      this.loadGltf();
+      this.addBox();
+      this.addConvex()
+      // this.loadGltf();
       this.initRender();
     },
     initLight(intensity) {
       // 生成光源
+      let ambLight = new THREE.AmbientLight(0x66ffffff);
+      this.scene.add(ambLight);
+
       let light = new THREE.PointLight(0xffffff, intensity);
       light.castShadow = true;
       light.receiveShadow = true;
@@ -76,6 +82,7 @@ export default {
       loader.load("/module/Horse.glb", function (gltf) {
         console.log("gltf", gltf);
         model = gltf.scene;
+        model.scale.set(0.1, 0.1, 0.1);
         model.position.set(0, 0, 0);
         self.scene.add(model);
         self.renderer.render(self.scene, self.camera);
@@ -96,11 +103,46 @@ export default {
         this.renderer.render(this.scene, this.camera);
       }); // 监听鼠标、键盘事件
     },
-    getGlobalFinancialCenterBottom() {
+    addBox() {
       let globalFinancialCenter = makeCuboid(10, 5, 2);
       globalFinancialCenter.position.set(10, 10, 10); // 位置
       this.scene.add(globalFinancialCenter);
     },
+    addConvex(){
+      // const points = this.generatePoints()
+      // // 使用 THREE.ConvexGeometry 生成几何体
+      // const convexMaterial = new THREE.MeshPhongMaterial({
+      //   color: "#666",
+      // })  
+      // const convexGeometry = new ConvexGeometry(points)
+      // const convexMesh = new THREE.Mesh(convexGeometry, convexMaterial)
+      let d=makeConvex([0, 0, 0,5, 0, 0,5, 0, 5,0, 0, 5,3, 5, 3])
+      this.scene.add(d[0]);   
+      this.scene.add(d[1]); 
+    },
+    // 随机生成20个点
+    generatePoints () {
+        // const points = []
+        // for (let i = 0; i < 20; i ++) {
+        //   const x = -15 + Math.round(Math.random() * 30)
+        //   const y = -15 + Math.round(Math.random() * 30)
+        //   const z = -15 + Math.round(Math.random() * 30)
+        //   points.push(new THREE.Vector3(x, y, z))
+        // }
+        const points = [new THREE.Vector3(0, 0, 0),new THREE.Vector3(5, 0, 0),new THREE.Vector3(5, 0, 5),new THREE.Vector3(0, 0, 5),new THREE.Vector3(3, 5, 3)]
+        const spGroup = new THREE.Object3D()
+        const material = new THREE.MeshBasicMaterial({
+          'color': 'red' // 材质颜色
+        })
+        points.forEach(point => {
+          const spGeom = new THREE.SphereGeometry(0.2)
+          const spMesh = new THREE.Mesh(spGeom, material)
+          spMesh.position.copy(point)
+          spGroup.add(spMesh)
+        })
+        this.scene.add(spGroup)
+        return points
+    }
   },
 };
 </script>
