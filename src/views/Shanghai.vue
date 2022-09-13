@@ -43,8 +43,8 @@ export default {
       this.groundFront();
       this.tower();
       this.getShanghaiTower();
-      this.getGlobalFinancialCenterBottom();
       this.getFinancialCenter()
+      this.getJingMao()
       this.initRender();
     },
     initLight(intensity) {
@@ -335,16 +335,6 @@ export default {
       let _geometry = new THREE.CylinderGeometry(2, 3, 18, 7, 50);
       // 2. 操作该圆柱的顶点， 通过正弦函数规律性的变化 使其网格发生变化
       // _geometry.vertices.forEach((vertex, ind) => {
-      //   // 正弦函数规律性的改变顶点坐标的x轴和z轴
-      //   vertex.z = vertex.z + Math.sin((vertex.y + ind) * 0.015);
-      //   vertex.x = vertex.x + Math.sin((vertex.y + ind) * 0.01) * 1;
-      //   if (vertex.y >= 8.5) {
-      //     // 3. 这里做了一个斜塔尖
-      //     vertex.y -= vertex.x * 0.2;
-      //   }
-      // });
-      // 4. 改变顶点后别忘记了让网格的verticesNeedUpdate等于true
-      // _geometry.verticesNeedUpdate = true;
       let len = _geometry.attributes.position.count;
       let arr = _geometry.attributes.position.array;
       for (let i = 0; i < len; i++) {
@@ -357,6 +347,14 @@ export default {
           y,
           z + Math.sin((y + i) * 0.015)
         );
+        if(y>=8.7){
+          _geometry.attributes.position.setXYZ(
+          i,
+          x ,
+          y - x * 0.2,
+          z 
+        );          
+        }
       }
       _geometry.attributes.position.needsUpdate = true;
 
@@ -365,14 +363,9 @@ export default {
         // wireframe: true
       });
       let tower = new THREE.Mesh(_geometry, _material);
-      tower.position.set(10, 17, -8); // 位置
+      tower.position.set(23, 17, -10); // 位置
       tower.scale.set(1, 2, 0.5); // 缩放
       this.scene.add(tower);
-    },
-    getGlobalFinancialCenterBottom() {
-      let globalFinancialCenter = makeCuboid(10, 5, 2);
-      globalFinancialCenter.position.set(10, 10, 10); // 位置
-      this.scene.add(globalFinancialCenter);
     },
     getFinancialCenter(){
       let FinancialCenter = new THREE.Group();
@@ -426,10 +419,54 @@ export default {
       FinancialCenter.add(FC)   
       let axis_bc_m1 = new THREE.Vector3(0, 1, 0); // 向量axis
       FinancialCenter.rotateOnAxis(axis_bc_m1, Math.PI / 2); // 绕axis轴旋转π/8  
-      FinancialCenter.position.set(-10,0,-10)    
+      FinancialCenter.position.set(-5,0,-15)    
       FinancialCenter.scale.set(0.85, 0.85, 0.85);
       this.scene.add(FinancialCenter); 
-    }
+    },
+    getJingMao(){
+      let JingMao = new THREE.Group();
+      let _material = new THREE.MeshPhongMaterial({
+        color: "#666"
+      });       
+      for(let i=0;i<=25;i++){
+        let d=i%2==0?8.5:8
+        let box1 = new THREE.BoxGeometry(d, 1, 0.95);
+        let box2 = new THREE.BoxGeometry(0.95, 1, d);
+        let mesh1=new THREE.Mesh(box1, _material);
+        let mesh2=new THREE.Mesh(box2, _material);
+        mesh1.position.set(10,0.5+i*1,10) 
+        mesh2.position.set(10,0.5+i*1,10) 
+        JingMao.add(mesh1)
+        JingMao.add(mesh2)
+      }
+      for(let i=0;i<=25;i++){
+        let d=7.5-i*0.2
+        let box1 = new THREE.BoxGeometry(d, 1, d);
+        let mesh1=new THREE.Mesh(box1, _material);
+        mesh1.position.set(10,0.5+i*1,10) 
+        JingMao.add(mesh1)
+      }  
+
+      for(let i=0;i<=3;i++){
+        let d=4.5-i*1
+        let box1 = new THREE.BoxGeometry(d, 0.5, d);
+        let mesh1=new THREE.Mesh(box1, _material);
+        mesh1.position.set(10,26+i*0.5,10) 
+        JingMao.add(mesh1)
+      }        
+
+      let top = new THREE.Mesh(
+        new THREE.CylinderGeometry(0, 10, 200, 5, 5),
+        _material
+      );
+      top.scale.set(0.078, 0.078, 0.078);
+      top.position.set(10, 27, 10);      
+      JingMao.add(top)
+      JingMao.scale.set(0.88, 0.88, 0.88);
+      JingMao.position.set(3,0.5,-25) 
+      this.scene.add(JingMao); 
+    },
+    
   },
 };
 </script>
