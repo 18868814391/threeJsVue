@@ -8,6 +8,7 @@ import Stats from "./stats.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import makeCuboid from "./components/Cuboid.js";
 import makeConvex from "./components/Convex.js"
+import vc from "./components/normalVector.js"
 // import { Face3 } from "three/examples/jsm/deprecated/Geometry";
 export default {
   data() {
@@ -65,7 +66,7 @@ export default {
         1,
         1000
       );
-      this.camera.position.set(0, 30, 0);
+      this.camera.position.set(40, 120, 120);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     },
     initRender() {
@@ -374,6 +375,7 @@ export default {
       this.scene.add(globalFinancialCenter);
     },
     getFinancialCenter(){
+      let FinancialCenter = new THREE.Group();
       let d=makeConvex([
         0, 0, 0,8, 0, 0,8, 0, 8,0, 0, 8,
         2,35,2,
@@ -387,8 +389,46 @@ export default {
         2.5,8,6,
         6,8,2.5
       ])
-      this.scene.add(d[0]);   
-      this.scene.add(d[1]); 
+      // FinancialCenter.add(d[0]);
+      FinancialCenter.add(d[1]);
+      let position = new Float32Array([
+        2,35,2,2.1,35,2.8,2.8,35,1.8,
+        2.45,38,2.3,2.8,35,1.8,2.1,35,2.8,
+        2.45,38,2.3,2.1,35,2.8,2,35,2,
+        2.45,38,2.3,2.8,35,1.8,2,35,2,
+        6,35,6,6.2,35,5.2,5.4,35,6.2,
+        5.8,38,5.7,5.4,35,6.2,6.2,35,5.2,
+        5.8,38,5.7,6.2,35,5.2,6,35,6,
+        5.8,38,5.7,5.4,35,6.2,6,35,6,
+        2.45,38,2.3,5.8,38,5.7,2.45,36,2.3,
+        5.8,38,5.7,2.45,36,2.3,5.8,36,5.7
+      ])
+      let str=vc([2,35,2],[2.1,35,2.8],[2.8,35,1.8])+','+vc([2,35,2],[2.1,35,2.8],[2.8,35,1.8])+','+vc([2,35,2],[2.1,35,2.8],[2.8,35,1.8])+','+
+              vc([2.45,38,2.3],[2.8,35,1.8],[2.1,35,2.8])+','+vc([2.45,38,2.3],[2.8,35,1.8],[2.1,35,2.8])+','+vc([2.45,38,2.3],[2.8,35,1.8],[2.1,35,2.8])+','+
+              vc([2.45,38,2.3],[2.1,35,2.8],[2,35,2])+','+vc([2.45,38,2.3],[2.1,35,2.8],[2,35,2])+','+vc([2.45,38,2.3],[2.1,35,2.8],[2,35,2])+','+
+              vc([2.45,38],[2.3,2.8,35],[1.8,2,35,2])+','+vc([2.45,38],[2.3,2.8,35],[1.8,2,35,2])+','+vc([2.45,38],[2.3,2.8,35],[1.8,2,35,2])+','+
+              vc([6,35,6],[6.2,35,5.2],[5.4,35,6.2])+','+vc([6,35,6],[6.2,35,5.2],[5.4,35,6.2])+','+vc([6,35,6],[6.2,35,5.2],[5.4,35,6.2])+','+
+              vc([5.8,38,5.7],[5.4,35,6.2],[6.2,35,5.2])+','+vc([5.8,38,5.7],[5.4,35,6.2],[6.2,35,5.2])+','+vc([5.8,38,5.7],[5.4,35,6.2],[6.2,35,5.2])+','+
+              vc([5.8,38,5.7],[6.2,35,5.2],[6,35,6])+','+vc([5.8,38,5.7],[6.2,35,5.2],[6,35,6])+','+vc([5.8,38,5.7],[6.2,35,5.2],[6,35,6])+','+
+              vc([5.8,38,5.7],[5.4,35,6.2],[6,35,6])+','+vc([5.8,38,5.7],[5.4,35,6.2],[6,35,6])+','+vc([5.8,38,5.7],[5.4,35,6.2],[6,35,6])+','+
+              vc([2.45,38,2.3],[5.8,38,5.7],[2.45,36,2.3])+','+vc([2.45,38,2.3],[5.8,38,5.7],[2.45,36,2.3])+','+vc([2.45,38,2.3],[5.8,38,5.7],[2.45,36,2.3])+','+
+              vc([5.8,38,5.7],[2.45,36,2.3],[5.8,36,5.7])+','+vc([5.8,38,5.7],[2.45,36,2.3],[5.8,36,5.7])+','+vc([5.8,38,5.7],[2.45,36,2.3],[5.8,36,5.7])
+        let arr=str.split(',')   
+      let normals = new Float32Array(arr);
+      let _geometry = new THREE.BufferGeometry();
+      _geometry.attributes.position = new THREE.BufferAttribute(position, 3);
+      _geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
+      let _material = new THREE.MeshPhongMaterial({
+        color: "#666",
+        side: THREE.DoubleSide, // 双面渲染
+      });   
+      let FC = new THREE.Mesh(_geometry, _material);
+      FinancialCenter.add(FC)   
+      let axis_bc_m1 = new THREE.Vector3(0, 1, 0); // 向量axis
+      FinancialCenter.rotateOnAxis(axis_bc_m1, Math.PI / 2); // 绕axis轴旋转π/8  
+      FinancialCenter.position.set(-10,0,-10)    
+      FinancialCenter.scale.set(0.85, 0.85, 0.85);
+      this.scene.add(FinancialCenter); 
     }
   },
 };
