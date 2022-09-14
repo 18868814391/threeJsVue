@@ -6,6 +6,7 @@
 import * as THREE from "three";
 import Stats from "../stats.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 // import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry'
@@ -33,16 +34,18 @@ export default {
     initWorld() {
       this.scene = new THREE.Scene();
       // 坐标轴辅助器
-      let axesHelper = new THREE.AxesHelper(500);
+      let axesHelper = new THREE.AxesHelper(1500);
       // 网格辅助器
       let gridHelper = new THREE.GridHelper(100, 100);
       this.scene.add(axesHelper);
       this.scene.add(gridHelper);
       this.initLight(1.2);
       this.initCamera();
-      this.addBox();
-      this.addConvex()
-      // this.loadGltf();
+      // this.addBox();
+      // this.addConvex()
+      this.loadGltf();
+      this.loadMyGltf();
+      // this.loadFBXL()
       this.initRender();
     },
     initLight(intensity) {
@@ -57,7 +60,7 @@ export default {
       light.shadow.bias = 0.001;
       light.shadow.mapSize.width = 2048;
       light.shadow.mapSize.height = 2048;
-      light.position.set(200, 200, 160);
+      light.position.set(1000, 1000, 1000);
       this.scene.add(light);
     },
     initCamera() {
@@ -67,8 +70,41 @@ export default {
         1,
         1000
       );
-      this.camera.position.set(0, 60, 180);
+      this.camera.position.set(250, 250, 800);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    },
+    // loadFBXL(){
+    //   const self = this;
+    //   let texturePlante = THREE.ImageUtils.loadTexture("/module/abc186f2-554f-4e7e-b7bb-38beaac46b81.png",null,function(t){});
+    //   const loader = new FBXLoader()
+    //   loader.load("/module/untitled.fbx",function(object){
+    //     object.traverse(function (child) {
+    //       var material = new THREE.MeshPhongMaterial({
+    //             map:texturePlante
+    //         });
+    //         child.material=material;
+    //         if (child.isMesh) {
+    //             child.castShadow = true;
+    //             child.receiveShadow = true;
+    //         }
+    //     });
+    //     object.position.set(0, -0.15, 0.3);
+    //     self.scene.add(object);
+    //     self.renderer.render(self.scene, self.camera);
+    //   })
+    // },
+    loadMyGltf(){
+      const self = this;
+      const loader = new GLTFLoader();
+      let model = "";
+      loader.load("/module/car.gltf", function (gltf) {
+        console.log("gltf11", gltf);
+        model = gltf.scene;
+        // model.scale.set(0.1, 0.1, 0.1);
+        model.position.set(10, 10, 10);
+        self.scene.add(model);
+        self.renderer.render(self.scene, self.camera);
+      });      
     },
     loadGltf() {
       const self = this;
@@ -80,7 +116,7 @@ export default {
       // loader.setDRACOLoader(dracoLoader);
       let model = "";
       loader.load("/module/Horse.glb", function (gltf) {
-        console.log("gltf", gltf);
+        console.log("gltf22", gltf);
         model = gltf.scene;
         model.scale.set(0.1, 0.1, 0.1);
         model.position.set(0, 0, 0);
