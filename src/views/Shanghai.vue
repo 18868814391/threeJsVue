@@ -45,6 +45,7 @@ export default {
       this.getShanghaiTower();
       this.getFinancialCenter()
       this.getJingMao()
+      this.randomBuilding()
       this.initRender();
     },
     initLight(intensity) {
@@ -464,9 +465,23 @@ export default {
       JingMao.add(top)
       JingMao.scale.set(0.88, 0.88, 0.88);
       JingMao.position.set(3,0.5,-25) 
-      this.scene.add(JingMao); 
+      this.scene.add(JingMao);
     },
-    
+    randomBuilding(){
+      let positions=[[5,0,-5],[-5,0,-10],[5,0,-25],[-6,0,-26],[12,0,0],[20,0,-30],[25,0,-20],[35,0,-35]]
+      let _material = new THREE.MeshPhongMaterial({
+        color: "#666"
+      });        
+      positions.forEach((v)=>{
+        let h=Math.random()*7.5+8
+        let box = new THREE.BoxGeometry(Math.random()*2.5+2, h, Math.random()*2.5+2);
+        let mesh=new THREE.Mesh(box, _material);
+        let axis_bc_m1 = new THREE.Vector3(0, 1, 0); // 向量axis
+        mesh.rotateOnAxis(axis_bc_m1, Math.PI / 8); // 绕axis轴旋转π/8          
+        mesh.position.set(v[0],h/2,v[2])
+        this.scene.add(mesh);
+      })
+    },
   },
 };
 </script>
