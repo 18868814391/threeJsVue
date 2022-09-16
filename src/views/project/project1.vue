@@ -1,23 +1,40 @@
 <template>
-  <div id="shanghai" ref="shanghai" class="shanghai"></div>
+  <div id="p1" ref="p1" class="p1">
+    <div class="btns">
+      <button @click="openMesh()">展开</button>
+      <button style="margin-left:50px" @click="closeMesh()">组合</button>
+    </div>
+    <div id="name-box" v-show="name" :style="{top:name_top+'px',left:name_left+'px'}">{{name}}</div>
+  </div>
 </template>
 
 <script>
 import * as THREE from "three";
 import Stats from "../stats.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-// import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import TWEEN from "@tweenjs/tween.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry'
+
+// outline postprocessing
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
+
 import makeCuboid from "../components/Cuboid.js";
 import makeConvex from "../components/Convex.js"
+
 export default {
   data() {
     return {
       MATERIAL_COLOR: "rgb(120, 120, 120)",
       stats: "",
-      clock: "",
+      itemList: [], // 存放raycaster检测对象
+      name:'',
+      name_top:'',
+      name_left:'',
     };
   },
   mounted() {
@@ -26,8 +43,13 @@ export default {
     this.camera = "";
     this.renderer = "";
     this.controls = "";
+    this.composer='';
+    this.outlinePass='';
+    this.raycaster='';
+    this.mouse='';
+    this.mousePosition='';
     this.stats = new Stats();
-    this.$refs.shanghai.appendChild(this.stats.dom);
+    this.$refs.p1.appendChild(this.stats.dom);
     this.initWorld();
   },
   methods: {
@@ -41,12 +63,10 @@ export default {
       this.scene.add(gridHelper);
       this.initLight(1.2);
       this.initCamera();
-      // this.addBox();
-      // this.addConvex()
-      this.loadGltf();
       this.loadMyGltf();
-      // this.loadFBXL()
       this.initRender();
+      this.initComposer();
+      this.initMouse();
     },
     initLight(intensity) {
       // 生成光源
@@ -70,59 +90,24 @@ export default {
         1,
         1000
       );
-      this.camera.position.set(250, 250, 800);
+      this.camera.position.set(-15, 15,16);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     },
-    // loadFBXL(){
-    //   const self = this;
-    //   let texturePlante = THREE.ImageUtils.loadTexture("/module/abc186f2-554f-4e7e-b7bb-38beaac46b81.png",null,function(t){});
-    //   const loader = new FBXLoader()
-    //   loader.load("/module/untitled.fbx",function(object){
-    //     object.traverse(function (child) {
-    //       var material = new THREE.MeshPhongMaterial({
-    //             map:texturePlante
-    //         });
-    //         child.material=material;
-    //         if (child.isMesh) {
-    //             child.castShadow = true;
-    //             child.receiveShadow = true;
-    //         }
-    //     });
-    //     object.position.set(0, -0.15, 0.3);
-    //     self.scene.add(object);
-    //     self.renderer.render(self.scene, self.camera);
-    //   })
-    // },
     loadMyGltf(){
       const self = this;
       const loader = new GLTFLoader();
       let model = "";
-      loader.load("/module/car.gltf", function (gltf) {
+      loader.load("/module/a-dismantling.glb", function (gltf) {
         console.log("gltf11", gltf);
         model = gltf.scene;
-        // model.scale.set(0.1, 0.1, 0.1);
-        model.position.set(10, 10, 10);
+        model.position.set(0, 5, 0);
         self.scene.add(model);
-        self.renderer.render(self.scene, self.camera);
+        self.scene.traverse(item=>{
+          self.itemList.push(item);
+        });      
+        self.animate();  
+        // self.renderer.render(self.scene, self.camera);
       });      
-    },
-    loadGltf() {
-      const self = this;
-      const loader = new GLTFLoader();
-      // const dracoLoader = new DRACOLoader();
-      // dracoLoader.setDecoderPath("/gltf/");
-      // dracoLoader.setDecoderConfig({ type: "js" });
-      // dracoLoader.preload();
-      // loader.setDRACOLoader(dracoLoader);
-      let model = "";
-      loader.load("/module/Horse.glb", function (gltf) {
-        console.log("gltf22", gltf);
-        model = gltf.scene;
-        model.scale.set(0.1, 0.1, 0.1);
-        model.position.set(0, 0, 0);
-        self.scene.add(model);
-        self.renderer.render(self.scene, self.camera);
-      });
     },
     initRender() {
       // 3.渲染器
@@ -132,60 +117,138 @@ export default {
       this.renderer.shadowMap.enabled = true; // 开启渲染器的阴影功能
       this.renderer.shadowMap.type = THREE.PCFShadowMap; // PCF阴影类型
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.$refs.shanghai.appendChild(self.renderer.domElement);
+      this.$refs.p1.appendChild(self.renderer.domElement);
       this.renderer.render(this.scene, this.camera);
       this.controls = new OrbitControls(this.camera, this.renderer.domElement); // 创建控件对象
       this.controls.addEventListener("change", () => {
         this.renderer.render(this.scene, this.camera);
       }); // 监听鼠标、键盘事件
     },
-    addBox() {
-      let globalFinancialCenter = makeCuboid(10, 5, 2);
-      globalFinancialCenter.position.set(10, 10, 10); // 位置
-      this.scene.add(globalFinancialCenter);
+    initComposer(){
+      const self=this
+      this.composer=new EffectComposer( self.renderer );
+      const renderPass = new RenderPass( self.scene, self.camera );
+      this.composer.addPass( renderPass );
+
+      this.outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), self.scene, self.camera );
+      this.outlinePass.edgeStrength = 5;
+      this.outlinePass.edgeGlow = 1;
+      this.outlinePass.pulsePeriod = 2;
+      this.outlinePass.visibleEdgeColor.set("#35f2d1");
+      this.outlinePass.hiddenEdgeColor.set("#00ffff");
+      this.composer.addPass( self.outlinePass );
+
+      const effectFXAA = new ShaderPass( FXAAShader );
+      effectFXAA.uniforms[ "resolution" ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+      this.composer.addPass( effectFXAA );
     },
-    addConvex(){
-      // const points = this.generatePoints()
-      // // 使用 THREE.ConvexGeometry 生成几何体
-      // const convexMaterial = new THREE.MeshPhongMaterial({
-      //   color: "#666",
-      // })  
-      // const convexGeometry = new ConvexGeometry(points)
-      // const convexMesh = new THREE.Mesh(convexGeometry, convexMaterial)
-      let d=makeConvex([0, 0, 0,5, 0, 0,5, 0, 5,0, 0, 5,3, 5, 3])
-      this.scene.add(d[0]);   
-      this.scene.add(d[1]); 
+    move(obj,position) { // 移动函数
+      new TWEEN.Tween(obj.position)
+          .to(position, 1000)
+          .onUpdate(function (val) {
+            obj.position.set(val.x || 0, val.y || 0, val.z || 0);
+          })
+          .start();
     },
-    // 随机生成20个点
-    generatePoints () {
-        // const points = []
-        // for (let i = 0; i < 20; i ++) {
-        //   const x = -15 + Math.round(Math.random() * 30)
-        //   const y = -15 + Math.round(Math.random() * 30)
-        //   const z = -15 + Math.round(Math.random() * 30)
-        //   points.push(new THREE.Vector3(x, y, z))
-        // }
-        const points = [new THREE.Vector3(0, 0, 0),new THREE.Vector3(5, 0, 0),new THREE.Vector3(5, 0, 5),new THREE.Vector3(0, 0, 5),new THREE.Vector3(3, 5, 3)]
-        const spGroup = new THREE.Object3D()
-        const material = new THREE.MeshBasicMaterial({
-          'color': 'red' // 材质颜色
-        })
-        points.forEach(point => {
-          const spGeom = new THREE.SphereGeometry(0.2)
-          const spMesh = new THREE.Mesh(spGeom, material)
-          spMesh.position.copy(point)
-          spGroup.add(spMesh)
-        })
-        this.scene.add(spGroup)
-        return points
-    }
+    openMesh(){
+      const self=this
+      this.move(self.scene.getObjectByName("Object_7"),{x:-2.5,y:1});
+      this.move(self.scene.getObjectByName("Object_18"),{x:-5,y:-1});
+
+      this.move(self.scene.getObjectByName("Object_10"),{x:2.5});
+      this.move(self.scene.getObjectByName("Object_11"),{x:2.5});
+    
+      this.move(self.scene.getObjectByName("Object_17"),{x:2.5});
+
+      this.move(self.scene.getObjectByName("Object_27"),{z:2.5});
+      this.move(self.scene.getObjectByName("Object_29"),{z:2.5});
+
+      this.move(self.scene.getObjectByName("Object_12"),{x:-5});
+      this.move(self.scene.getObjectByName("Object_14"),{z:-5});
+      this.move(self.scene.getObjectByName("Object_16"),{z:-5});
+    },
+    closeMesh(){
+      const self=this
+      this.move(self.scene.getObjectByName("Object_7"),{x:0,y:0});
+      this.move(self.scene.getObjectByName("Object_18"),{x:0,y:0});
+
+      this.move(self.scene.getObjectByName("Object_10"),{x:0});
+      this.move(self.scene.getObjectByName("Object_11"),{x:0});
+    
+      this.move(self.scene.getObjectByName("Object_17"),{x:0});
+
+      this.move(self.scene.getObjectByName("Object_27"),{z:0});
+      this.move(self.scene.getObjectByName("Object_29"),{z:0});
+
+      this.move(self.scene.getObjectByName("Object_12"),{x:0});
+      this.move(self.scene.getObjectByName("Object_14"),{z:0});
+      this.move(self.scene.getObjectByName("Object_16"),{z:0});
+    },
+    initMouse(){
+      // 选中高亮并显示名称
+      this.raycaster = new THREE.Raycaster();
+      this.mouse = new THREE.Vector2( 1, 1 );
+      this.mousePosition = {x:0,y:0};
+      document.addEventListener( "mousemove", this.onMouseMove, false );
+    },
+    onMouseMove(event){
+      event.preventDefault();
+      this.mousePosition.x =event.clientX;
+      this.mousePosition.y =event.clientY;
+      this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+      this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    }, 
+    animate(){
+      const self=this
+      TWEEN.update();
+      this.raycaster.setFromCamera(self.mouse, self.camera);
+      const intersection = this.raycaster.intersectObjects( self.itemList );
+      if(intersection.length>0){
+        // 给选中的物体 设置outline效果
+        this.outlinePass.selectedObjects = [intersection[0].object];
+        // 名称提示
+        this.name=intersection[0].object.name.replace("Object_","零件");
+        this.name_top=this.mousePosition.y; // 跟随鼠标的位置
+        this.name_left=this.mousePosition.x + 30;   
+        console.log()     
+      }else{
+        this.outlinePass.selectedObjects = [];
+        nameBox.style.display = "none";
+      }
+      this.composer.render();
+      requestAnimationFrame( this.animate );
+    },
   },
 };
 </script>
 
 <style lang="less" scoped>
-.shanghai {
+.p1 {
   width: 100vw;
   height: 100vh;
+  position:relative;
+}
+#name-box{
+	position:absolute;
+  z-index:1;
+	color: white;
+	background-color: rgba(15, 15, 200, 0.774);
+	font-size: 32px;
+	font-weight: 600;
+	pointer-events: none;
+	padding: 15px;
+	border-radius: 10px;
+}
+.btns{
+  width:100%;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left:50%;
+  transform: translateX(-50%);
 }
 </style>
