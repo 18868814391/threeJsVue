@@ -12,6 +12,7 @@ export default {
   data() {
     return {
       guide: [
+        { name: "电脑装配", path: "/project1" },
         { name: "过马路", path: "/crossRoad" },
         { name: "全景", path: "/house" },
         { name: "飞机", path: "/plane" },

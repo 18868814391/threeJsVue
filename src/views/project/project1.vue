@@ -1,6 +1,7 @@
 <template>
   <div id="p1" ref="p1" class="p1">
     <div class="btns">
+      <div class="tip">{{tip}}</div>
       <button @click="openMesh()">展开</button>
       <button style="margin-left:50px" @click="closeMesh()">组合</button>
     </div>
@@ -35,6 +36,7 @@ export default {
       name:'',
       name_top:'',
       name_left:'',
+      tip:'',
     };
   },
   mounted() {
@@ -97,7 +99,8 @@ export default {
       const self = this;
       const loader = new GLTFLoader();
       let model = "";
-      loader.load("/module/a-dismantling.glb", function (gltf) {
+      let env=process.env.NODE_ENV
+      loader.load(`${env=='development'?'':'/threeJs'}/module/a-dismantling.glb`, function (gltf) {
         console.log("gltf11", gltf);
         model = gltf.scene;
         model.position.set(0, 5, 0);
@@ -107,8 +110,12 @@ export default {
         });      
         self.animate();  
         // self.renderer.render(self.scene, self.camera);
-      });      
+      },self.handleProgress);      
     },
+    handleProgress(progressEvent) {
+      console.log("handleProgress",progressEvent.loaded,progressEvent.total);
+      this.tip = `加载模型中:${(progressEvent.loaded/progressEvent.total * 100).toFixed(0) }%`;
+    },    
     initRender() {
       // 3.渲染器
       const self = this;
@@ -198,6 +205,7 @@ export default {
       this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     }, 
+
     animate(){
       const self=this
       TWEEN.update();
@@ -213,7 +221,7 @@ export default {
         console.log()     
       }else{
         this.outlinePass.selectedObjects = [];
-        nameBox.style.display = "none";
+        this.name = "";
       }
       this.composer.render();
       requestAnimationFrame( this.animate );
@@ -250,5 +258,10 @@ export default {
   top: 0;
   left:50%;
   transform: translateX(-50%);
+  .tip{
+    color: white;
+    font-size: 16px;
+    text-indent: 20px;
+  }
 }
 </style>
