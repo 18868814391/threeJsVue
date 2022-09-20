@@ -1,5 +1,7 @@
 <template>
-  <div id="p2" ref="p2" class="p2"></div>
+  <div id="p2" ref="p2" class="p2">
+    <div class="tip">{{tip}}</div>
+  </div>
 </template>
 
 <script>
@@ -13,13 +15,15 @@ import TWEEN from "@tweenjs/tween.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-
+const clock = new THREE.Clock();
 export default {
   data() {
     return {
       MATERIAL_COLOR: "rgb(120, 120, 120)",
       stats: "",
       clock: "",
+      tip:'',
+      animateList:[],
     };
   },
   mounted() {
@@ -45,8 +49,8 @@ export default {
       // this.scene.add(gridHelper);
       this.initLight(1.2);
       this.initCamera();
-      this.initCity();
       this.initRender();
+      this.initCity();
       this.initBlom();
     },
     initLight(intensity) {
@@ -109,6 +113,7 @@ export default {
         });        
         model.position.set(0, 0, 0);
         self.scene.add(model);
+        self.addElevator(gltf)
         const roadNum = 4;
         for(let i = 1;i<=roadNum;i++){
           const name = `road${i?"00"+i:""}`;
@@ -116,13 +121,35 @@ export default {
           self.change2LightTrail(road);
         }        
         self.animate();
-      })
+      },self.handleProgress)
     },
+    handleProgress(progressEvent) {
+      console.log("handleProgress",progressEvent.loaded,progressEvent.total);
+      this.tip = `加载模型中:${(progressEvent.loaded/progressEvent.total * 100).toFixed(0) }%`;
+    },      
     animate(){
       const self=this
+      const delta = clock.getDelta();
+      this.animateList.forEach(mixer=>{
+        mixer.update( delta );
+      });
       TWEEN.update();
       this.bloomComposer.render();
       requestAnimationFrame( self.animate );
+    },
+    addElevator(gltf){
+      const self=this
+      const elevatorList = ["Elevator","Elevator001"];
+      elevatorList.forEach((item,index)=>{
+        const elevator = self.scene.getObjectByName(item);
+        console.log('elevatorelevator',elevator)
+        const mesh = self.change2LightBox(elevator);
+        // 创建Animation
+        const mixer = new THREE.AnimationMixer( mesh );
+        const clipAction = mixer.clipAction( gltf.animations[index] );
+        clipAction.play();
+        self.animateList.push(mixer);
+      });
     },
     change2BasicMat(object3d){
       const basicMat = new THREE.MeshBasicMaterial({
@@ -190,6 +217,31 @@ export default {
         mesh.geometry.setAttribute( "color", new THREE.Float32BufferAttribute( newColorArray, 3 ) );
       })
       .start();
+    },
+    change2LightBox(object3d){
+      const group = new THREE.Group();
+      const lineMaterial = new THREE.LineBasicMaterial({color: 0x00FFFF});
+      const boxMaterial = new THREE.MeshBasicMaterial({
+        opacity: 0.1 ,
+        color:0x00cccc,
+        side: THREE.BackSide,
+        transparent: true,
+      });
+      const geo = new THREE.EdgesGeometry(object3d.geometry);
+      const line = new THREE.LineSegments( geo , lineMaterial);
+      const box = new THREE.Mesh(object3d.geometry, boxMaterial);
+      
+      group
+      .add(line)
+      .add(box);
+
+      group.position.set(object3d.position.x,object3d.position.y,object3d.position.z);
+      group.rotation.set(object3d.rotation.x,object3d.rotation.y,object3d.rotation.z);
+      group.scale.set(object3d.scale.x,object3d.scale.y,object3d.scale.z);
+
+      object3d.parent.add(group);
+      object3d.visible = false;
+      return group;
     }    
   },
 };
@@ -199,5 +251,15 @@ export default {
 .p2 {
   width: 100vw;
   height: 100vh;
+  position: relative;
+  .tip{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 16px;
+    text-indent: 20px;
+  }
 }
 </style>
