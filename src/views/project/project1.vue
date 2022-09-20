@@ -90,7 +90,7 @@ export default {
         45,
         window.innerWidth / window.innerHeight,
         1,
-        1000
+        2000
       );
       this.camera.position.set(-15, 15,16);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -101,8 +101,8 @@ export default {
       let model = "";
       let env=process.env.NODE_ENV
       loader.load(`${env=='development'?'':'/threeJs'}/module/a-dismantling.glb`, function (gltf) {
-        console.log("gltf11", gltf);
         model = gltf.scene;
+        console.log('p1',model)
         model.position.set(0, 5, 0);
         self.scene.add(model);
         self.scene.traverse(item=>{

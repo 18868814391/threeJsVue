@@ -1,17 +1,19 @@
 <template>
-  <div id="shanghai" ref="shanghai" class="shanghai"></div>
+  <div id="p2" ref="p2" class="p2"></div>
 </template>
 
 <script>
 import * as THREE from "three";
 import Stats from "../stats.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-// import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry'
-import makeCuboid from "../components/Cuboid.js";
-import makeConvex from "../components/Convex.js"
+import {interpolateHsl} from "d3-interpolate";
+import TWEEN from "@tweenjs/tween.js";
+// bloom
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+
 export default {
   data() {
     return {
@@ -26,27 +28,26 @@ export default {
     this.camera = "";
     this.renderer = "";
     this.controls = "";
+    this.bloomComposer="";
     this.stats = new Stats();
-    this.$refs.shanghai.appendChild(this.stats.dom);
+    this.clock = new THREE.Clock();
+    this.$refs.p2.appendChild(this.stats.dom);
     this.initWorld();
   },
   methods: {
     initWorld() {
       this.scene = new THREE.Scene();
       // 坐标轴辅助器
-      let axesHelper = new THREE.AxesHelper(1500);
+      // let axesHelper = new THREE.AxesHelper(1500);
       // 网格辅助器
-      let gridHelper = new THREE.GridHelper(100, 100);
-      this.scene.add(axesHelper);
-      this.scene.add(gridHelper);
+      // let gridHelper = new THREE.GridHelper(100, 100);
+      // this.scene.add(axesHelper);
+      // this.scene.add(gridHelper);
       this.initLight(1.2);
       this.initCamera();
-      // this.addBox();
-      // this.addConvex()
-      this.loadGltf();
-      this.loadMyGltf();
-      // this.loadFBXL()
+      this.initCity();
       this.initRender();
+      this.initBlom();
     },
     initLight(intensity) {
       // 生成光源
@@ -64,127 +65,131 @@ export default {
       this.scene.add(light);
     },
     initCamera() {
-      this.camera = new THREE.PerspectiveCamera(
-        45,
-        window.innerWidth / window.innerHeight,
-        1,
-        1000
-      );
-      this.camera.position.set(250, 250, 800);
+      this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+      this.camera.position.set(3,3,5);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-    },
-    // loadFBXL(){
-    //   const self = this;
-    //   let texturePlante = THREE.ImageUtils.loadTexture("/module/abc186f2-554f-4e7e-b7bb-38beaac46b81.png",null,function(t){});
-    //   const loader = new FBXLoader()
-    //   loader.load("/module/untitled.fbx",function(object){
-    //     object.traverse(function (child) {
-    //       var material = new THREE.MeshPhongMaterial({
-    //             map:texturePlante
-    //         });
-    //         child.material=material;
-    //         if (child.isMesh) {
-    //             child.castShadow = true;
-    //             child.receiveShadow = true;
-    //         }
-    //     });
-    //     object.position.set(0, -0.15, 0.3);
-    //     self.scene.add(object);
-    //     self.renderer.render(self.scene, self.camera);
-    //   })
-    // },
-    loadMyGltf(){
-      const self = this;
-      const loader = new GLTFLoader();
-      let model = "";
-      loader.load("/module/a-dismantling.glb", function (gltf) {
-        console.log("gltf11", gltf);
-        model = gltf.scene;
-        // model.scale.set(0.1, 0.1, 0.1);
-        model.position.set(10, 10, 10);
-        self.scene.add(model);
-        self.renderer.render(self.scene, self.camera);
-      });      
-    },
-    loadGltf() {
-      const self = this;
-      const loader = new GLTFLoader();
-      // const dracoLoader = new DRACOLoader();
-      // dracoLoader.setDecoderPath("/gltf/");
-      // dracoLoader.setDecoderConfig({ type: "js" });
-      // dracoLoader.preload();
-      // loader.setDRACOLoader(dracoLoader);
-      let model = "";
-      loader.load("/module/Horse.glb", function (gltf) {
-        console.log("gltf22", gltf);
-        model = gltf.scene;
-        model.scale.set(0.1, 0.1, 0.1);
-        model.position.set(0, 0, 0);
-        self.scene.add(model);
-        self.renderer.render(self.scene, self.camera);
-      });
     },
     initRender() {
       // 3.渲染器
       const self = this;
       this.renderer = new THREE.WebGLRenderer();
-      this.renderer.setClearColor(self.MATERIAL_COLOR);
+      this.renderer.setClearColor();
       this.renderer.shadowMap.enabled = true; // 开启渲染器的阴影功能
       this.renderer.shadowMap.type = THREE.PCFShadowMap; // PCF阴影类型
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.$refs.shanghai.appendChild(self.renderer.domElement);
+      this.$refs.p2.appendChild(self.renderer.domElement);
       this.renderer.render(this.scene, this.camera);
       this.controls = new OrbitControls(this.camera, this.renderer.domElement); // 创建控件对象
       this.controls.addEventListener("change", () => {
         this.renderer.render(this.scene, this.camera);
       }); // 监听鼠标、键盘事件
     },
-    addBox() {
-      let globalFinancialCenter = makeCuboid(10, 5, 2);
-      globalFinancialCenter.position.set(10, 10, 10); // 位置
-      this.scene.add(globalFinancialCenter);
+    initBlom(){
+      const self=this
+      const renderScene = new RenderPass( this.scene, this.camera );
+      const bloomPass  = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+      bloomPass .threshold = 0.3;
+      bloomPass .strength = 2;
+      bloomPass .radius = 0.3;
+      this.bloomComposer = new EffectComposer( self.renderer );
+      this.bloomComposer.addPass( renderScene );
+      this.bloomComposer.addPass( bloomPass  );      
     },
-    addConvex(){
-      // const points = this.generatePoints()
-      // // 使用 THREE.ConvexGeometry 生成几何体
-      // const convexMaterial = new THREE.MeshPhongMaterial({
-      //   color: "#666",
-      // })  
-      // const convexGeometry = new ConvexGeometry(points)
-      // const convexMesh = new THREE.Mesh(convexGeometry, convexMaterial)
-      let d=makeConvex([0, 0, 0,5, 0, 0,5, 0, 5,0, 0, 5,3, 5, 3])
-      this.scene.add(d[0]);   
-      this.scene.add(d[1]); 
+    initCity(){
+      const self=this
+      let env=process.env.NODE_ENV
+      let model = "";
+      const loader = new GLTFLoader();
+      loader.load( `${env=='development'?'':'/threeJs'}/module/b-city.glb`, function ( gltf ) {
+        model = gltf.scene;
+        console.log('p2',model)
+        const list = [...model.children];
+        list.forEach(item=>{
+          self.change2BasicMat(item);
+        });        
+        model.position.set(0, 0, 0);
+        self.scene.add(model);
+        const roadNum = 4;
+        for(let i = 1;i<=roadNum;i++){
+          const name = `road${i?"00"+i:""}`;
+          const road = self.scene.getObjectByName(name);
+          self.change2LightTrail(road);
+        }        
+        self.renderer.render(self.scene, self.camera);
+      })
     },
-    // 随机生成20个点
-    generatePoints () {
-        // const points = []
-        // for (let i = 0; i < 20; i ++) {
-        //   const x = -15 + Math.round(Math.random() * 30)
-        //   const y = -15 + Math.round(Math.random() * 30)
-        //   const z = -15 + Math.round(Math.random() * 30)
-        //   points.push(new THREE.Vector3(x, y, z))
-        // }
-        const points = [new THREE.Vector3(0, 0, 0),new THREE.Vector3(5, 0, 0),new THREE.Vector3(5, 0, 5),new THREE.Vector3(0, 0, 5),new THREE.Vector3(3, 5, 3)]
-        const spGroup = new THREE.Object3D()
-        const material = new THREE.MeshBasicMaterial({
-          'color': 'red' // 材质颜色
-        })
-        points.forEach(point => {
-          const spGeom = new THREE.SphereGeometry(0.2)
-          const spMesh = new THREE.Mesh(spGeom, material)
-          spMesh.position.copy(point)
-          spGroup.add(spMesh)
-        })
-        this.scene.add(spGroup)
-        return points
-    }
+    change2BasicMat(object3d){
+      const basicMat = new THREE.MeshBasicMaterial({
+        opacity: 0.25 ,
+        color:0x1f56b9,
+        side: THREE.BackSide,
+        transparent: true,
+      });    
+      object3d.traverse(item=>{
+        if(item.material){
+          item.material = basicMat;
+        }
+      });
+    },
+    change2LightTrail(object3d) {
+      const self=this
+      // 使用顶点颜色 VertexColors
+      const material = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors,side: THREE.BackSide } );
+      const geometry = object3d.geometry.clone();
+      // 生成渐变色的color数组
+      const count = geometry.attributes.position.count;
+      const rgbInterpolate = interpolateHsl("#00ffff", "#000000");
+      const colorArray = new Array(count);
+      for (let index = 0; index < count; index++) {
+        const t = index / count;
+        const rgb = rgbInterpolate(t);
+        const rgbValue = rgb.match(/\d+/g);
+        // 从 "rgb(1,2,3)" 字符串里 提取出 1,2,3 并 归一化（ 0.0 ~ 1.0）
+        const r = Number(rgbValue[0]) / 255;
+        const g = Number(rgbValue[1]) / 255;
+        const b = Number(rgbValue[2]) / 255;
+
+        colorArray[3 * index] =  r;
+        colorArray[3 * index + 1] = g;  
+        colorArray[3 * index + 2] =  b;
+      }
+
+      const anchor = Number((Math.random() * count).toFixed(0));
+      const b = colorArray.slice(anchor * 3);
+      const f = colorArray.slice(0, anchor * 3);
+      const newColorArray = [].concat(b, f) ;
+
+      geometry.setAttribute( "color", new THREE.Float32BufferAttribute( newColorArray, 3 ) );
+      const mesh = new THREE.Mesh( geometry, material);
+      mesh.position.set(object3d.position.x,object3d.position.y,object3d.position.z);
+      mesh.rotation.set(object3d.rotation.x,object3d.rotation.y,object3d.rotation.z);
+      mesh.scale.set(object3d.scale.x,object3d.scale.y,object3d.scale.z);
+      object3d.parent.add(mesh);
+      setInterval(() => {
+        self.lightMove(mesh,newColorArray);
+      }, 2000);
+    },    
+    // 颜色变化
+    lightMove(mesh,colorArray) {
+      const len = colorArray.length/3;
+      new TWEEN.Tween({value:0})
+      .to({value:1}, 2000)
+      .onUpdate(function (val) {
+        // 实现环状数组变化
+        const anchor = Number((val.value * len).toFixed(0));
+        const b = colorArray.slice(anchor * 3);
+        const f = colorArray.slice(0, anchor * 3);
+        const newColorArray = [].concat(b, f) ;
+        mesh.geometry.setAttribute( "color", new THREE.Float32BufferAttribute( newColorArray, 3 ) );
+      })
+      .start();
+    }    
   },
 };
 </script>
 
 <style lang="less" scoped>
-.shanghai {
+.p2 {
   width: 100vw;
   height: 100vh;
 }
