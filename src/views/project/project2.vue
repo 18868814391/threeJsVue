@@ -115,8 +115,14 @@ export default {
           const road = self.scene.getObjectByName(name);
           self.change2LightTrail(road);
         }        
-        self.renderer.render(self.scene, self.camera);
+        self.animate();
       })
+    },
+    animate(){
+      const self=this
+      TWEEN.update();
+      this.bloomComposer.render();
+      requestAnimationFrame( self.animate );
     },
     change2BasicMat(object3d){
       const basicMat = new THREE.MeshBasicMaterial({
@@ -165,6 +171,7 @@ export default {
       mesh.rotation.set(object3d.rotation.x,object3d.rotation.y,object3d.rotation.z);
       mesh.scale.set(object3d.scale.x,object3d.scale.y,object3d.scale.z);
       object3d.parent.add(mesh);
+      self.lightMove(mesh,newColorArray);
       setInterval(() => {
         self.lightMove(mesh,newColorArray);
       }, 2000);
