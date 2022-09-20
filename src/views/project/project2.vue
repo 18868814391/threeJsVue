@@ -1,6 +1,7 @@
 <template>
   <div id="p2" ref="p2" class="p2">
     <div class="tip">{{tip}}</div>
+    <div class="warn" :style="{top:top+'px',left:left+'px'}">⚠</div>
   </div>
 </template>
 
@@ -24,6 +25,8 @@ export default {
       clock: "",
       tip:'',
       animateList:[],
+      top:0,
+      left:0,
     };
   },
   mounted() {
@@ -114,12 +117,7 @@ export default {
         model.position.set(0, 0, 0);
         self.scene.add(model);
         self.addElevator(gltf)
-        const roadNum = 4;
-        for(let i = 1;i<=roadNum;i++){
-          const name = `road${i?"00"+i:""}`;
-          const road = self.scene.getObjectByName(name);
-          self.change2LightTrail(road);
-        }        
+        self.addRoads()      
         self.animate();
       },self.handleProgress)
     },
@@ -134,8 +132,18 @@ export default {
         mixer.update( delta );
       });
       TWEEN.update();
+      this.setStaticPosition()
       this.bloomComposer.render();
       requestAnimationFrame( self.animate );
+    },
+    addRoads(){
+      const self=this
+      const roadNum = 4;
+      for(let i = 1;i<=roadNum;i++){
+        const name = `road${i?"00"+i:""}`;
+        const road = self.scene.getObjectByName(name);
+        self.change2LightTrail(road);
+      }  
     },
     addElevator(gltf){
       const self=this
@@ -242,7 +250,22 @@ export default {
       object3d.parent.add(group);
       object3d.visible = false;
       return group;
-    }    
+    },
+    setStaticPosition(){
+      const self=this
+      const box3 = new THREE.Box3();
+      const object3d = this.scene.getObjectByName("road003");
+      const widthHalf = window.innerWidth / 2;
+      const heightHalf = window. innerHeight / 2;
+      // 获取在3D空间里的坐标
+      const vector = new THREE.Vector3();
+      box3.setFromObject(object3d);
+      box3.getCenter(vector);
+      vector.project(self.camera);
+      // 转换成平面坐标
+      this.left=vector.x * widthHalf + widthHalf;
+      this.top=-(vector.y * heightHalf) + heightHalf;
+    }  
   },
 };
 </script>
@@ -260,6 +283,11 @@ export default {
     color: white;
     font-size: 16px;
     text-indent: 20px;
+  }
+  .warn{
+    position: absolute;
+    color: red;
+    font-size: 30px;
   }
 }
 </style>
