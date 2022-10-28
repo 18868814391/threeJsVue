@@ -471,7 +471,7 @@ export default {
       let positions=[[5,0,-5],[-5,0,-10],[5,0,-25],[-6,0,-26],[12,0,0],[20,0,-30],[25,0,-20],[35,0,-35]]
       let _material = new THREE.MeshPhongMaterial({
         color: "#666"
-      });        
+      }); 
       positions.forEach((v)=>{
         let h=Math.random()*7.5+8
         let box = new THREE.BoxGeometry(Math.random()*2.5+2, h, Math.random()*2.5+2);
