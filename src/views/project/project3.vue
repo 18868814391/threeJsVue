@@ -5,6 +5,7 @@
 <script>
 import * as THREE from "three";
 import Stats from "../stats.js";
+import TWEEN from "@tweenjs/tween.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { groundAdd } from './js/wall.js'
 import { cabinetAdd } from './js/cabinet.js'
@@ -18,6 +19,11 @@ export default {
       MATERIAL_COLOR: "rgb(120, 120, 120)",
       stats: "",
       clock: "",
+      mouse:null,
+      mousePosition:{},
+      raycaster:null,
+      itemList:[],
+      outLineName:'',
     };
   },
   mounted() {
@@ -38,8 +44,8 @@ export default {
       this.initLight(1.2);
       this.initCamera();
       this.addMeshes()
-      // this.groundAdd();
       this.initRender();
+      this.initMouse()
     },
     initLight(intensity) {
       // 生成光源
@@ -78,10 +84,51 @@ export default {
     },
     addMeshes(){
       let wall=groundAdd(this.upDataCallBack)
+      this.itemList.push(wall)
       this.scene.add(wall)
       let cabinet=cabinetAdd()
+      this.itemList.push(cabinet)
       this.scene.add(cabinet)
-    }   
+      this.initMouse()
+      this.animate()
+    },
+    initMouse(){
+      // 选中高亮并显示名称
+      this.raycaster = new THREE.Raycaster();
+      this.mouse = new THREE.Vector2( 1, 1 );
+      this.mousePosition = {x:0,y:0};
+      document.addEventListener( "mousemove", this.onMouseMove, false );
+    },
+    onMouseMove(event){
+      event.preventDefault();
+      this.mousePosition.x =event.clientX;
+      this.mousePosition.y =event.clientY;
+      this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+      this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    }, 
+    animate(){
+      const self=this
+      // console.log(self.mouse)
+      this.raycaster.setFromCamera(self.mouse, self.camera); 
+      const intersection = this.raycaster.intersectObjects( self.itemList, true );    
+      if(intersection.length>0){
+        // console.log(intersection)
+        let mm=intersection[0].object
+        if(this.outLineName && (this.outLineName==mm.id)){
+          console.log('onajibox')
+        }else{
+          if(this.outLineName){
+            this.scene.remove(this.scene.getObjectByName(this.outLineName));
+          }
+          let box=new THREE.BoxHelper( mm, '#00ffff');  //object 模型
+          box.name=mm.id
+          this.outLineName=mm.id
+          this.scene.add(box)
+        }
+        this.upDataCallBack()
+      }
+      requestAnimationFrame( this.animate );
+    }
   },
 };
 </script>
