@@ -49,6 +49,7 @@ export default {
     },
     initLight(intensity) {
       // 生成光源
+      let AmbLight = new THREE.AmbientLight(0xffffff, 0.2)
       let light = new THREE.PointLight(0xffffff, intensity);
       light.castShadow = true;
       light.receiveShadow = true;
@@ -56,12 +57,14 @@ export default {
       light.shadow.bias = 0.001;
       light.shadow.mapSize.width = 2048;
       light.shadow.mapSize.height = 2048;
-      light.position.set(100, 100, 80);
+      light.position.set(20, 100, 120);
+      AmbLight.position.set(100, 100, 80);
       this.scene.add(light);
+      this.scene.add(AmbLight);
     },
     initCamera() {
       this.camera = new THREE.PerspectiveCamera(45,window.innerWidth / window.innerHeight,1,1000);
-      this.camera.position.set(40, 120, 120);
+      this.camera.position.set(40, 80, 200);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     },
     initRender() {
@@ -115,7 +118,7 @@ export default {
         // console.log(intersection)
         let mm=intersection[0].object
         if(this.outLineName && (this.outLineName==mm.id)){
-          console.log('onajibox')
+          // console.log('onajibox')
         }else{
           if(this.outLineName){
             this.scene.remove(this.scene.getObjectByName(this.outLineName));
