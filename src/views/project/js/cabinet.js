@@ -7,7 +7,7 @@ function cabinetAdd(callBack) {
   let doors = new THREE.Group();
   let _material=new THREE.MeshPhongMaterial({color: 0xaaaaaa})
   let _material2=new THREE.MeshStandardMaterial({
-    roughness: 0.5,
+    roughness: 0.75,
     metalness: 1
 })
 
@@ -33,7 +33,6 @@ function cabinetAdd(callBack) {
     mesh.updateMatrix() // 更新投影矩阵，不更新各mesh位置会不正确
     // 更新后的矩阵，重新转换为几何体，此时，几何体位置才正确
     const newGeometry = mesh.geometry.applyMatrix4(mesh.matrix)
-    console.log('mesh.matrixmesh.matrix',mesh.matrix)
     geos.push(newGeometry)
   })
   const bufferGeometry = BufferGeometryUtils.mergeBufferGeometries(geos)
@@ -45,15 +44,13 @@ function cabinetAdd(callBack) {
   doorHand.position.set(-7,20,11)
   doors.add(door)
   doors.add(doorHand)
-  // doors.position.set(0,0,0)
-  // doors.rotation.y=Math.PI/4
-  // doors.rotateOnAxis(axis,Math.PI/4)
   let axis=new THREE.Vector3(0, 1, 0)
-  let ddd=getRotationMatrix({x:5,y:0,z:5},axis,-Math.PI / 4)
+  let ddd=getRotationMatrix({x:10,y:0,z:10},axis,Math.PI / 4)
   let matrix = new THREE.Matrix4();
-  matrix.set(ddd[0],ddd[1],ddd[2],ddd[3],ddd[4],ddd[5],ddd[6],ddd[7],ddd[8],ddd[9],ddd[10],ddd[11],ddd[12],ddd[13],ddd[14],ddd[15])
-  console.log('getRotationMatrix',matrix)
-  console.log('doors.matrix',doors.matrix)
+  ddd.forEach((v,i)=>{
+    matrix.elements[i]=ddd[i]
+  })
+
   doors.applyMatrix4(matrix);
   cabinet.add(singleMergeMesh,doors)
   return cabinet
