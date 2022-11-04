@@ -8,7 +8,7 @@ import Stats from "../stats.js";
 import TWEEN from "@tweenjs/tween.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { groundAdd } from './js/wall.js'
-import { cabinetAdd } from './js/cabinet.js'
+import { cabinetAdd,openDoor } from './js/cabinet.js'
 import makeCuboid from "../components/Cuboid.js";
 import makeConvex from "../components/Convex.js"
 import vc from "../components/normalVector.js"
@@ -92,6 +92,7 @@ export default {
       let cabinet=cabinetAdd(this.upDataCallBack)
       this.itemList.push(cabinet)
       this.scene.add(cabinet)
+      // openDoor(this.upDataCallBack)
       this.initMouse()
       this.animate()
     },
@@ -101,6 +102,7 @@ export default {
       this.mouse = new THREE.Vector2( 1, 1 );
       this.mousePosition = {x:0,y:0};
       document.addEventListener( "mousemove", this.onMouseMove, false );
+      document.addEventListener( "mousedown", this.onMouseDown, false );
     },
     onMouseMove(event){
       event.preventDefault();
@@ -109,16 +111,27 @@ export default {
       this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     }, 
+    onMouseDown(event){
+      const self=this
+      // console.log(self.mouse)
+      this.raycaster.setFromCamera(self.mouse, self.camera); 
+      const intersection = this.raycaster.intersectObjects( self.itemList, true );    
+      if(intersection.length>0){
+        let mm=intersection[0].object
+        if(mm.name=='Iamdoor'){
+          openDoor(this.upDataCallBack)
+        }
+      }      
+      
+    },
     animate(){
       const self=this
       // console.log(self.mouse)
       this.raycaster.setFromCamera(self.mouse, self.camera); 
       const intersection = this.raycaster.intersectObjects( self.itemList, true );    
       if(intersection.length>0){
-        // console.log(intersection)
         let mm=intersection[0].object
         if(this.outLineName && (this.outLineName==mm.id)){
-          // console.log('onajibox')
         }else{
           if(this.outLineName){
             this.scene.remove(this.scene.getObjectByName(this.outLineName));

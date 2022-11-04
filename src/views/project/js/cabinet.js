@@ -2,7 +2,6 @@ import * as THREE from "three";
 import {BufferGeometryUtils} from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { getRotationMatrix } from './rotationMatrix'
 // import {mergeBufferGeometries} from "three/examples/jsm/utils/BufferGeometryUtils.js";
-function cabinetAdd(callBack) {
   let cabinet = new THREE.Group();
   let doors = new THREE.Group();
   let _material=new THREE.MeshPhongMaterial({color: 0xaaaaaa})
@@ -41,31 +40,41 @@ function cabinetAdd(callBack) {
   door.position.set(0,20,10)
   let doorHand=new THREE.Mesh(new THREE.BoxBufferGeometry(2, 4, 1), _material2);
   doorHand.position.set(-7,20,11)
+  door.name='Iamdoor'
+  doorHand.name='Iamdoor'
   doors.add(door)
   doors.add(doorHand)
-
+  cabinet.add(singleMergeMesh,doors)
+function cabinetAdd() {
+  return cabinet
+}
+let deg=0.031
+let inTrans=false
+let isOpen=false
+let timeObj=null
+function openDoor(callBack){
   let axis=new THREE.Vector3(0, 1, 0)
-  let deg=0
-  setTimeout(() => {
-    setInterval(() => {
-      if(deg>(Math.PI / 8)){
-        return false
+    timeObj=setInterval(() => {
+      console.log(deg<(Math.PI / 8)&&!isOpen)
+      console.log('deg',deg)
+      if(isOpen){
+        if(deg<(Math.PI / 8)){
+          deg=deg+0.05
+        }else{
+          inTrans=false
+          isOpen=true
+          clearInterval(timeObj)
+        }
       }
-      deg+=0.05
       let ddd=getRotationMatrix({x:10,y:0,z:10},axis,deg)
       let matrix = new THREE.Matrix4();
       ddd.forEach((v,i)=>{
         matrix.elements[i]=ddd[i]
       })
       doors.applyMatrix4(matrix);  
-      callBack()    
+      callBack()  
     }, 100);
-  }, 1000);
-
-
-  cabinet.add(singleMergeMesh,doors)
-  return cabinet
 }
 export {
-  cabinetAdd
+  cabinetAdd,openDoor
 }
