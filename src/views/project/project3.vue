@@ -89,7 +89,7 @@ export default {
       let wall=groundAdd(this.upDataCallBack)
       this.itemList.push(wall)
       this.scene.add(wall)
-      let cabinet=cabinetAdd()
+      let cabinet=cabinetAdd(this.upDataCallBack)
       this.itemList.push(cabinet)
       this.scene.add(cabinet)
       this.initMouse()

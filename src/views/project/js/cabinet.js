@@ -37,21 +37,32 @@ function cabinetAdd(callBack) {
   })
   const bufferGeometry = BufferGeometryUtils.mergeBufferGeometries(geos)
   let singleMergeMesh=new THREE.Mesh(bufferGeometry, _material)
-
   let door=new THREE.Mesh(new THREE.BoxBufferGeometry(20, 40, 1), _material2);
   door.position.set(0,20,10)
   let doorHand=new THREE.Mesh(new THREE.BoxBufferGeometry(2, 4, 1), _material2);
   doorHand.position.set(-7,20,11)
   doors.add(door)
   doors.add(doorHand)
-  let axis=new THREE.Vector3(0, 1, 0)
-  let ddd=getRotationMatrix({x:10,y:0,z:10},axis,Math.PI / 4)
-  let matrix = new THREE.Matrix4();
-  ddd.forEach((v,i)=>{
-    matrix.elements[i]=ddd[i]
-  })
 
-  doors.applyMatrix4(matrix);
+  let axis=new THREE.Vector3(0, 1, 0)
+  let deg=0
+  setTimeout(() => {
+    setInterval(() => {
+      if(deg>(Math.PI / 8)){
+        return false
+      }
+      deg+=0.05
+      let ddd=getRotationMatrix({x:10,y:0,z:10},axis,deg)
+      let matrix = new THREE.Matrix4();
+      ddd.forEach((v,i)=>{
+        matrix.elements[i]=ddd[i]
+      })
+      doors.applyMatrix4(matrix);  
+      callBack()    
+    }, 100);
+  }, 1000);
+
+
   cabinet.add(singleMergeMesh,doors)
   return cabinet
 }
