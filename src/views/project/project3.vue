@@ -8,7 +8,7 @@ import Stats from "../stats.js";
 import TWEEN from "@tweenjs/tween.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { groundAdd } from './js/wall.js'
-import { cabinetAdd,openDoor } from './js/cabinet.js'
+import { MakeCabinet } from './js/cabinet.js'
 import makeCuboid from "../components/Cuboid.js";
 import makeConvex from "../components/Convex.js"
 import vc from "../components/normalVector.js"
@@ -24,6 +24,9 @@ export default {
       raycaster:null,
       itemList:[],
       outLineName:'',
+      CabinetPro1:null,
+      CabinetPro2:null,
+      CabinetPro3:null,
     };
   },
   mounted() {
@@ -89,14 +92,30 @@ export default {
       let wall=groundAdd(this.upDataCallBack)
       this.itemList.push(wall)
       this.scene.add(wall)
-      let cabinet=cabinetAdd('cabinet1')
-      let cabinet2=cabinetAdd('cabinet2')
-      cabinet2.position.set(-30,0,-30)
-      cabinet.position.set(30,0,30)
-      this.itemList.push(cabinet)
-      this.itemList.push(cabinet2)
-      this.scene.add(cabinet)
-      this.scene.add(cabinet2)
+
+      // let cabinet=cabinetAdd('cabinet1')
+      // cabinet.position.set(30,0,30)
+      // this.itemList.push(cabinet)
+      // this.scene.add(cabinet)
+
+      this.CabinetPro1=new MakeCabinet('CabinetPro1',this.upDataCallBack)
+      let Cabinet=this.CabinetPro1.giveCabinet()
+      Cabinet.position.set(-30,0,-30)
+      this.itemList.push(Cabinet)
+      this.scene.add(Cabinet)
+
+      this.CabinetPro2=new MakeCabinet('CabinetPro2',this.upDataCallBack)
+      let Cabinet2=this.CabinetPro2.giveCabinet()
+      Cabinet2.position.set(0,0,-30)
+      this.itemList.push(Cabinet2)
+      this.scene.add(Cabinet2)      
+
+      this.CabinetPro3=new MakeCabinet('CabinetPro3',this.upDataCallBack)
+      let Cabinet3=this.CabinetPro3.giveCabinet()
+      Cabinet3.position.set(30,0,-30)
+      this.itemList.push(Cabinet3)
+      this.scene.add(Cabinet3)        
+
       this.initMouse()
       this.animate()
     },
@@ -122,8 +141,8 @@ export default {
       const intersection = this.raycaster.intersectObjects( self.itemList, true );    
       if(intersection.length>0){
         let mm=intersection[0].object
-        if(mm.name=='Iamdoor'){
-          openDoor(this.upDataCallBack)
+        if(mm.name.indexOf('CabinetPro')!=-1){
+          self[mm.name].switchDoor()
         }
       }      
       
