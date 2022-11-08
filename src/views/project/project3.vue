@@ -93,11 +93,6 @@ export default {
       this.itemList.push(wall)
       this.scene.add(wall)
 
-      // let cabinet=cabinetAdd('cabinet1')
-      // cabinet.position.set(30,0,30)
-      // this.itemList.push(cabinet)
-      // this.scene.add(cabinet)
-
       this.CabinetPro1=new MakeCabinet('CabinetPro1',this.upDataCallBack)
       let Cabinet=this.CabinetPro1.giveCabinet()
       Cabinet.position.set(-30,0,-30)
@@ -136,7 +131,6 @@ export default {
     }, 
     onMouseDown(event){
       const self=this
-      // console.log(self.mouse)
       this.raycaster.setFromCamera(self.mouse, self.camera); 
       const intersection = this.raycaster.intersectObjects( self.itemList, true );    
       if(intersection.length>0){

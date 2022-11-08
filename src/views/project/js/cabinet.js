@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import {BufferGeometryUtils} from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { getRotationMatrix } from './rotationMatrix'
+import { MakeSD } from './serverDevice'
 // import {mergeBufferGeometries} from "three/examples/jsm/utils/BufferGeometryUtils.js";
 let MakeCabinet=function(name,callBack){
   const self=this
@@ -56,6 +57,7 @@ this.meshArr.forEach((mesh)=>{
   this.doors.add(self.door)
   this.doors.add(self.doorHand)
   this.cabinet.add(self.singleMergeMesh,self.doors)
+  this.addSD()
 }
 MakeCabinet.prototype.giveCabinet = function () {
   return this.cabinet
@@ -98,7 +100,12 @@ MakeCabinet.prototype.switchDoor = function () {
       })
       this.doors.applyMatrix4(matrix);  
       this.c_callBack()  
-    }, 25);  
+    }, 15);  
+};
+MakeCabinet.prototype.addSD = function () {
+  let sd=MakeSD()
+  sd.position.set(0,20,0)
+  this.cabinet.add(sd)
 };
 export {
   MakeCabinet
