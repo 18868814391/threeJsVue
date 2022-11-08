@@ -14,6 +14,10 @@ let MakeCabinet=function(name,callBack){
   this.inChange=false
   this.timeObj=null 
 
+  this.SD_top=null
+  this.SD_center=null
+  this.SD_bottom=null
+
   this.cabinet = new THREE.Group();
   this.doors = new THREE.Group();
   this._material=new THREE.MeshPhongMaterial({color: 0xaaaaaa})
@@ -57,7 +61,9 @@ this.meshArr.forEach((mesh)=>{
   this.doors.add(self.door)
   this.doors.add(self.doorHand)
   this.cabinet.add(self.singleMergeMesh,self.doors)
-  this.addSD()
+  this.addSD(`${name}_top`)
+  this.addSD(`${name}_center`)
+  this.addSD(`${name}_bottom`)
 }
 MakeCabinet.prototype.giveCabinet = function () {
   return this.cabinet
@@ -102,11 +108,40 @@ MakeCabinet.prototype.switchDoor = function () {
       this.c_callBack()  
     }, 15);  
 };
-MakeCabinet.prototype.addSD = function () {
-  let sd=MakeSD()
-  sd.position.set(0,20,0)
-  this.cabinet.add(sd)
+MakeCabinet.prototype.addSD = function (name) {
+  const self=this
+  if(name.indexOf('top')!=-1){
+    this.SD_top=new MakeSD(name,this.c_callBack)
+    let sd=this.SD_top.giveSD()    
+    sd.position.set(0,35,0)
+    this.cabinet.add(sd)
+  }
+  if(name.indexOf('center')!=-1){
+    this.SD_center=new MakeSD(name,this.c_callBack)
+    let sd=this.SD_center.giveSD()  
+    sd.position.set(0,25,0)
+    this.cabinet.add(sd)
+  }
+  if(name.indexOf('bottom')!=-1){
+    this.SD_bottom=new MakeSD(name,this.c_callBack)
+    let sd=this.SD_bottom.giveSD()  
+    sd.position.set(0,15,0)
+    this.cabinet.add(sd)
+  }
 };
+MakeCabinet.prototype.pickSD=function (name){
+  console.log(name)
+  if(name.indexOf('top')!=-1){
+    this.SD_top.pickOut()
+  }
+  if(name.indexOf('center')!=-1){
+    this.SD_center.pickOut()
+  }
+  if(name.indexOf('bottom')!=-1){
+    this.SD_bottom.pickOut()
+  }
+  // Make_SD.pickOut()
+}
 export {
   MakeCabinet
 }

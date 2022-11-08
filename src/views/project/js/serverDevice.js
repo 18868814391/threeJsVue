@@ -1,6 +1,12 @@
 import * as THREE from "three";
 let MakeSD=function(name,callBack){
   const self=this
+  this.timeObj=null 
+  this.flag=0
+  this.step=1
+  this.inChange=false
+  this.call_Back=callBack
+  this.name=name
   let loader = new THREE.TextureLoader();
   let geometry = new THREE.BoxGeometry(19, 2, 19);
   let one = loader.load(require('../../../assets/sd-c.png'));
@@ -17,8 +23,40 @@ let MakeSD=function(name,callBack){
   const material6 = new THREE.MeshBasicMaterial( { map: six} );
   const materials = [material1,material2,material3,material4,material5,material6]
   const dice = new THREE.Mesh(geometry, materials);
-  return dice
+  dice.name=name
+  this.dice=dice
 }
+MakeSD.prototype.giveSD=function (){
+  return this.dice
+}
+MakeSD.prototype.pickOut = function () {
+  const self=this
+  if(this.inChange){
+    return false
+  }
+  this.timeObj=setInterval(() => {
+    if(this.flag===0&&this.step<=30){
+      this.inChange=true
+      this.step=this.step+1
+    }
+    if(this.flag===0&&this.step>30){
+      this.inChange=false
+      this.flag=1
+      clearInterval(self.timeObj)
+    }
+    if(this.flag===1&&this.step>=1){
+      // this.inChange=true
+      this.step=this.step-1
+    }
+    if(this.flag===1&&this.step<1){
+      this.inChange=false
+      this.flag=0
+      clearInterval(self.timeObj)
+    }
+    this.dice.position.z=this.step
+    self.call_Back()
+  },25)
+};
 export{
   MakeSD
 }

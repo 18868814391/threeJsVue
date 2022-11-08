@@ -135,7 +135,10 @@ export default {
       const intersection = this.raycaster.intersectObjects( self.itemList, true );    
       if(intersection.length>0){
         let mm=intersection[0].object
-        if(mm.name.indexOf('CabinetPro')!=-1){
+        console.log('hickName',mm.name)
+        if(mm.name.indexOf('CabinetPro')!=-1&&mm.name.indexOf('_')!=-1){
+          self[mm.name.split('_')[0]].pickSD(mm.name)
+        }else if(mm.name.indexOf('CabinetPro')!=-1){
           self[mm.name].switchDoor()
         }
       }      
