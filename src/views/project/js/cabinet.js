@@ -45,26 +45,43 @@ import { getRotationMatrix } from './rotationMatrix'
   doors.add(door)
   doors.add(doorHand)
   cabinet.add(singleMergeMesh,doors)
-function cabinetAdd() {
+function cabinetAdd(name) {
   return cabinet
 }
 let deg=0.031
-let inTrans=false
-let isOpen=false
+let flag=0
+let openStatus=0
+let inChange=false
 let timeObj=null
 function openDoor(callBack){
+  if(inChange){
+    return false
+  }
   let axis=new THREE.Vector3(0, 1, 0)
     timeObj=setInterval(() => {
-      console.log(deg<(Math.PI / 8)&&!isOpen)
-      console.log('deg',deg)
-      if(isOpen){
-        if(deg<(Math.PI / 8)){
-          deg=deg+0.05
-        }else{
-          inTrans=false
-          isOpen=true
-          clearInterval(timeObj)
-        }
+      if(flag<(Math.PI / 8)&&openStatus===0){
+        inChange=true
+        deg=0.031
+        flag=flag+0.0065
+      }
+      if(flag>=(Math.PI / 8)&&openStatus===0){
+        openStatus=1
+        deg=-0.031  
+        inChange=false
+        clearInterval(timeObj)
+        return false
+      }
+      if(flag>=0.0065&&openStatus===1){
+        deg=-0.031  
+        flag=flag-0.0065
+        inChange=true
+      }
+      if(flag<0.0065&&openStatus===1){
+        openStatus=0
+        deg=0.031  
+        inChange=false
+        clearInterval(timeObj)
+        return false
       }
       let ddd=getRotationMatrix({x:10,y:0,z:10},axis,deg)
       let matrix = new THREE.Matrix4();
@@ -73,7 +90,7 @@ function openDoor(callBack){
       })
       doors.applyMatrix4(matrix);  
       callBack()  
-    }, 100);
+    }, 25);
 }
 export {
   cabinetAdd,openDoor
