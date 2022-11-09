@@ -7,8 +7,10 @@ import * as THREE from "three";
 import Stats from "../stats.js";
 import TWEEN from "@tweenjs/tween.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { groundAdd } from './js/wall.js'
 import { MakeCabinet } from './js/cabinet.js'
+import { MakeDesk } from './js/addDesk.js'
 import makeCuboid from "../components/Cuboid.js";
 import makeConvex from "../components/Convex.js"
 import vc from "../components/normalVector.js"
@@ -47,6 +49,7 @@ export default {
       this.initLight(1.2);
       this.initCamera();
       this.addMeshes()
+      this.addGlb()
       this.initRender();
       this.initMouse()
     },
@@ -113,6 +116,16 @@ export default {
 
       this.initMouse()
       this.animate()
+    },
+    addGlb(){
+      const self=this
+      let MakeDeskPro=new MakeDesk()
+      MakeDeskPro.loadGLB().then((f)=>{
+        self.scene.add(f)
+        setTimeout(()=>{
+          self.upDataCallBack()
+        },150)
+      })
     },
     initMouse(){
       // 选中高亮并显示名称
