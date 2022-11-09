@@ -11,6 +11,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { groundAdd } from './js/wall.js'
 import { MakeCabinet } from './js/cabinet.js'
 import { MakeDesk } from './js/addDesk.js'
+import { CreateLine } from './js/addLine.js'
 import makeCuboid from "../components/Cuboid.js";
 import makeConvex from "../components/Convex.js"
 import vc from "../components/normalVector.js"
@@ -50,6 +51,7 @@ export default {
       this.initCamera();
       this.addMeshes()
       this.addGlb()
+      this.addLine()
       this.initRender();
       this.initMouse()
     },
@@ -126,6 +128,20 @@ export default {
           self.upDataCallBack()
         },150)
       })
+    },
+    addLine(){
+      let mLine=new CreateLine()
+      let ddd=mLine.normalLine()
+      let ddd2=mLine.pathLine()
+      this.scene.add(ddd)
+      this.scene.add(ddd2)
+      setTimeout(()=>{
+        this.upDataCallBack()
+      },150)
+      setInterval(()=>{
+        mLine.loopLine()
+        this.upDataCallBack()
+      },50)
     },
     initMouse(){
       // 选中高亮并显示名称
