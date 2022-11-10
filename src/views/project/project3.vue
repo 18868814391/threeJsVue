@@ -69,6 +69,11 @@ export default {
       AmbLight.position.set(100, 100, 80);
       this.scene.add(light);
       this.scene.add(AmbLight);
+
+      let rectLight = new THREE.RectAreaLight(0xff0000,1500,5,5);
+      rectLight.position.set(0, 5, 0);
+      rectLight.lookAt(0, 5, 0)
+      this.scene.add(rectLight);
     },
     initCamera() {
       this.camera = new THREE.PerspectiveCamera(45,window.innerWidth / window.innerHeight,1,1000);
@@ -130,18 +135,24 @@ export default {
       })
     },
     addLine(){
-      let mLine=new CreateLine()
-      let ddd=mLine.normalLine()
-      let ddd2=mLine.pathLine()
-      this.scene.add(ddd)
+      let mLine1=new CreateLine()
+      let mLine2=new CreateLine()
+      let ddd1=mLine1.pathLine([
+        [-20, 1, -40],[-15, 1, -40],[-15, 1, -20],[-10, 1, -20]
+      ])
+      let ddd2=mLine2.pathLine([
+        [20, 1, -40],[15, 1, -40],[15, 1, -20],[10, 1, -20]
+      ])
+      this.scene.add(ddd1)
       this.scene.add(ddd2)
       setTimeout(()=>{
         this.upDataCallBack()
       },150)
       setInterval(()=>{
-        mLine.loopLine()
+        mLine1.loopLine()
+        mLine2.loopLine()
         this.upDataCallBack()
-      },50)
+      },25)
     },
     initMouse(){
       // 选中高亮并显示名称

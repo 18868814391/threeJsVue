@@ -30,13 +30,11 @@ CreateLine.prototype.normalLine=function(){
   const line = new THREE.Line(geometry, material);
   return line  
 }
-CreateLine.prototype.pathLine=function(){
+CreateLine.prototype.pathLine=function(pointArr=[]){
   const self=this
   const curve = new CustomSinCurve(10);
   const points = curve.getPoints(100);
   console.log('points',points)
-
-  // let points=[new THREE.Vector3(20, 20, 0),new THREE.Vector3(20, -20, 0),new THREE.Vector3(-20, -20, 0),new THREE.Vector3(-20, 20, 0)]
   const positions = new Float32Array(100 * 3);
   points.forEach((point, index) => {
     positions[index * 3 + 0] = point.x;
@@ -51,14 +49,15 @@ CreateLine.prototype.pathLine=function(){
   this.texture.wrapT = THREE.RepeatWrapping;
   this.texture.repeat.x = 10;
   this.texture.repeat.y = 1;
+  let Parr=[]
+  pointArr.forEach((v)=>{
+    Parr.push(new THREE.Vector3(v[0],v[1],v[2]))
+  })
+  let path = new THREE.CatmullRomCurve3(Parr);
 
-  const tubeGeometry = new THREE.TubeGeometry(
-    new CustomSinCurve(12),
-    20,
-    2,
-    8,
-    false
-  );
+  const tubeGeometry = new THREE.TubeGeometry(path,20,0.75,8,false);
+  // new CustomSinCurve(12)
+
   const tubeMaterial = new THREE.MeshStandardMaterial({
     color: 0x156289,
     emissive: 0x156289,
