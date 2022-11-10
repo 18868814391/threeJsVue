@@ -5,9 +5,9 @@ class CustomSinCurve extends THREE.Curve {
     this.scale = scale;
   }
   getPoint(t, optionalTarget = new THREE.Vector3()) {
-    const tx = t * 3 - 1.5;
+    const tx = t * 3 ;
     const ty = Math.sin(2 * Math.PI * t);
-    const tz = 0;
+    const tz = t * 3;
     return optionalTarget.set(tx, ty, tz).multiplyScalar(this.scale);
   }
 }
@@ -34,6 +34,9 @@ CreateLine.prototype.pathLine=function(){
   const self=this
   const curve = new CustomSinCurve(10);
   const points = curve.getPoints(100);
+  console.log('points',points)
+
+  // let points=[new THREE.Vector3(20, 20, 0),new THREE.Vector3(20, -20, 0),new THREE.Vector3(-20, -20, 0),new THREE.Vector3(-20, 20, 0)]
   const positions = new Float32Array(100 * 3);
   points.forEach((point, index) => {
     positions[index * 3 + 0] = point.x;
@@ -41,7 +44,8 @@ CreateLine.prototype.pathLine=function(){
     positions[index * 3 + 2] = point.z;
   });
   let i = 0;
-  this.texture = new THREE.TextureLoader().load( "https://img.alicdn.com/imgextra/i1/O1CN01aZYitI1uCVXDFNOKJ_!!6000000006001-2-tps-100-48.png"
+  this.texture = new THREE.TextureLoader().load( 
+    require("../../../assets/pathImg.png")
   );
   this.texture.wrapS = THREE.RepeatWrapping;
   this.texture.wrapT = THREE.RepeatWrapping;
