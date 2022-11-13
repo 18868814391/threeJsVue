@@ -17,10 +17,11 @@ let MakeSD=function(name,callBack){
   let six = loader.load(require('../../../assets/sd-b.png'));
   const material1 = new THREE.MeshBasicMaterial( { map: one} );
   const material2 = new THREE.MeshBasicMaterial( { map: two} );
-  const material3 = new THREE.MeshBasicMaterial( { map: three} );
+  const material3 = new THREE.MeshStandardMaterial( { map: three} );
   const material4 = new THREE.MeshBasicMaterial( { map: four} );
   const material5 = new THREE.MeshBasicMaterial( { map: five} );
   const material6 = new THREE.MeshBasicMaterial( { map: six} );
+
   const materials = [material1,material2,material3,material4,material5,material6]
   const dice = new THREE.Mesh(geometry, materials);
   dice.name=name

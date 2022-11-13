@@ -20,7 +20,7 @@ let MakeCabinet=function(name,callBack){
 
   this.cabinet = new THREE.Group();
   this.doors = new THREE.Group();
-  this._material=new THREE.MeshPhongMaterial({color: 0xaaaaaa})
+  this._material=new THREE.MeshPhysicalMaterial({color: 0xaaaaaa})
   this._material2=new THREE.MeshStandardMaterial({
     roughness: 0.75,
     metalness: 1
@@ -57,7 +57,7 @@ this.meshArr.forEach((mesh)=>{
   this.doorHand=new THREE.Mesh(new THREE.BoxBufferGeometry(2, 4, 1), self._material2);
   this.doorHand.position.set(-7,20,11)
   this.door.name=this.c_name
-  this.doorHand.name=this.c_name
+  this.doorHand.name=this.c_name+'hand'
   this.doors.add(self.door)
   this.doors.add(self.doorHand)
   this.cabinet.add(self.singleMergeMesh,self.doors)

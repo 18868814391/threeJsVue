@@ -34,7 +34,6 @@ CreateLine.prototype.pathLine=function(pointArr=[]){
   const self=this
   const curve = new CustomSinCurve(10);
   const points = curve.getPoints(100);
-  console.log('points',points)
   const positions = new Float32Array(100 * 3);
   points.forEach((point, index) => {
     positions[index * 3 + 0] = point.x;

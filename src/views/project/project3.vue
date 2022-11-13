@@ -1,5 +1,7 @@
 <template>
-  <div id="p3" ref="p3" class="p3"></div>
+  <div id="p3" ref="p3" class="p3">
+    <div class="warn" :style="{top:top+'px',left:left+'px'}">⚠</div>
+  </div>
 </template>
 
 <script>
@@ -19,6 +21,8 @@ import vc from "../components/normalVector.js"
 export default {
   data() {
     return {
+      top:'',
+      left:'',
       MATERIAL_COLOR: "rgb(120, 120, 120)",
       stats: "",
       clock: "",
@@ -70,9 +74,9 @@ export default {
       this.scene.add(light);
       this.scene.add(AmbLight);
 
-      let rectLight = new THREE.RectAreaLight(0xff0000,1500,5,5);
-      rectLight.position.set(0, 5, 0);
-      rectLight.lookAt(0, 5, 0)
+      let rectLight = new THREE.RectAreaLight(0xff0000,100,3,3);
+      rectLight.position.set(35, 40, -30);
+      rectLight.lookAt(35, 0, -30)
       this.scene.add(rectLight);
     },
     initCamera() {
@@ -178,6 +182,8 @@ export default {
         console.log('hickName',mm.name)
         if(mm.name.indexOf('CabinetPro')!=-1&&mm.name.indexOf('_')!=-1){
           self[mm.name.split('_')[0]].pickSD(mm.name)
+        }else if(mm.name.indexOf('CabinetPro')!=-1&&mm.name.indexOf('hand')!=-1){
+          self[mm.name.split('hand')[0]].switchDoor()
         }else if(mm.name.indexOf('CabinetPro')!=-1){
           self[mm.name].switchDoor()
         }
@@ -186,6 +192,7 @@ export default {
     },
     animate(){
       const self=this
+      this.setStaticPosition()
       // console.log(self.mouse)
       this.raycaster.setFromCamera(self.mouse, self.camera); 
       const intersection = this.raycaster.intersectObjects( self.itemList, true );    
@@ -204,6 +211,21 @@ export default {
         this.upDataCallBack()
       }
       requestAnimationFrame( this.animate );
+    },
+    setStaticPosition(){
+      const self=this
+      const box3 = new THREE.Box3();
+      const object3d = this.scene.getObjectByName("CabinetPro3hand");
+      const widthHalf = window.innerWidth / 2;
+      const heightHalf = window. innerHeight / 2;
+      // 获取在3D空间里的坐标
+      const vector = new THREE.Vector3();
+      box3.setFromObject(object3d);
+      box3.getCenter(vector);
+      vector.project(self.camera);
+      // 转换成平面坐标
+      this.left=vector.x * widthHalf + widthHalf;
+      this.top=-(vector.y * heightHalf) + heightHalf;
     }
   },
 };
@@ -213,5 +235,22 @@ export default {
 .p3 {
   width: 100vw;
   height: 100vh;
+  .warn{
+    position: absolute;
+    color: red;
+    font-size: 20px;
+    animation: fade 1000ms infinite;
+  }
+  @keyframes fade {
+    from {        
+      opacity: 1.0;    
+    }
+    50% {        
+      opacity: 0.4;    
+    }
+    to {        
+      opacity: 1.0;    
+    }
+  }
 }
 </style>
