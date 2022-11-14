@@ -35,6 +35,7 @@ export default {
       CabinetPro1:null,
       CabinetPro2:null,
       CabinetPro3:null,
+      animationMixer:null,
     };
   },
   mounted() {
@@ -49,16 +50,33 @@ export default {
   },
   methods: {
     initWorld() {
+      const self=this
       this.scene = new THREE.Scene();
       let axesHelper = new THREE.AxesHelper(500);
       this.scene.add(axesHelper);
+      this.animationMixer = new THREE.AnimationMixer(self.scene);
+      this.clock = new THREE.Clock();
       this.initLight(1.2);
       this.initCamera();
       this.addMeshes()
-      this.addGlb()
+      // this.addGlb()
       this.addLine()
+      this.addRobots()
       this.initRender();
       this.initMouse()
+    },
+    addRobots(){
+      const loader = new GLTFLoader();
+      const self=this
+      let env=process.env.NODE_ENV
+      loader.load( `${env=='development'?'':'/threeJs'}/module/RobotExpressive.glb`, function ( gltf ) {
+        self.scene.add(gltf.scene)
+        console.log(gltf)
+        const animationClip=gltf.animations.find(animationClip => animationClip.name ==='Walking')
+        const action = self.animationMixer.clipAction(animationClip);
+        console.log('action',action)
+        action.play();
+      })
     },
     initLight(intensity) {
       // 生成光源
@@ -196,7 +214,10 @@ export default {
       this.setStaticPosition()
       // console.log(self.mouse)
       this.raycaster.setFromCamera(self.mouse, self.camera); 
-      const intersection = this.raycaster.intersectObjects( self.itemList, true );    
+      const intersection = this.raycaster.intersectObjects( self.itemList, true ); 
+      
+      this.animationMixer.update(self.clock.getDelta())
+      
       if(intersection.length>0){
         let mm=intersection[0].object
         if(this.outLineName && (this.outLineName==mm.id)){
