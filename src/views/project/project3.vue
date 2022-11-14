@@ -12,7 +12,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { groundAdd } from './js/wall.js'
 import { MakeCabinet } from './js/cabinet.js'
-import { MakeDesk } from './js/addDesk.js'
+// import { MakeDesk } from './js/addDesk.js'
+import { MakeRobot } from './js/addRobot.js'
 import { CreateLine } from './js/addLine.js'
 import makeCuboid from "../components/Cuboid.js";
 import makeConvex from "../components/Convex.js"
@@ -130,8 +131,8 @@ export default {
     },
     addGlb(){
       const self=this
-      let MakeDeskPro=new MakeDesk()
-      MakeDeskPro.loadGLB().then((f)=>{
+      let MakeRobotPro=new MakeRobot()
+      MakeRobotPro.loadGLB().then((f)=>{
         self.scene.add(f)
         setTimeout(()=>{
           self.upDataCallBack()
