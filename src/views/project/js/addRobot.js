@@ -35,6 +35,7 @@ MakeRobot.prototype.loadGLB=function(){
         }
       }
       console.log('self.actions',self.actions)
+      //https://github.com/mrdoob/three.js/blob/master/examples/webgl_animation_skinning_morph.html
       self.actions.Walking.play();
       resolve(self.model)
     })    
