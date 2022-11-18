@@ -35,7 +35,9 @@ export default {
       CabinetPro1:null,
       CabinetPro2:null,
       CabinetPro3:null,
-      animationMixer:null,
+      MakeRobotPro:null,
+      robotMesh:null,
+      robotMix:null,
     };
   },
   mounted() {
@@ -54,29 +56,14 @@ export default {
       this.scene = new THREE.Scene();
       let axesHelper = new THREE.AxesHelper(500);
       this.scene.add(axesHelper);
-      this.animationMixer = new THREE.AnimationMixer(self.scene);
       this.clock = new THREE.Clock();
       this.initLight(1.2);
       this.initCamera();
       this.addMeshes()
-      // this.addGlb()
+      this.addGlb()
       this.addLine()
-      this.addRobots()
       this.initRender();
       this.initMouse()
-    },
-    addRobots(){
-      const loader = new GLTFLoader();
-      const self=this
-      let env=process.env.NODE_ENV
-      loader.load( `${env=='development'?'':'/threeJs'}/module/RobotExpressive.glb`, function ( gltf ) {
-        self.scene.add(gltf.scene)
-        console.log(gltf)
-        const animationClip=gltf.animations.find(animationClip => animationClip.name ==='Walking')
-        const action = self.animationMixer.clipAction(animationClip);
-        console.log('action',action)
-        action.play();
-      })
     },
     initLight(intensity) {
       // 生成光源
@@ -149,13 +136,25 @@ export default {
     },
     addGlb(){
       const self=this
-      let MakeRobotPro=new MakeRobot()
-      MakeRobotPro.loadGLB().then((f)=>{
-        self.scene.add(f)
+      this.MakeRobotPro=new MakeRobot()
+      this.MakeRobotPro.loadGLB().then((f)=>{
+        self.robotMesh=f[0]
+        self.robotMix=f[1]
+        self.robotAction=f[2]
+        self.robotMesh.position.set(0,0,20)
+        self.robotMesh.name='robot'
+        console.log('self.robotMesh',self.robotMesh)
+        self.itemList.push(self.robotMesh)
+        self.scene.add(self.robotMesh)
+        self.MakeRobotPro.actionDo('Idle')
         setTimeout(()=>{
-          self.upDataCallBack()
-        },150)
+          self.MakeRobotPro.actionDo('Walking')
+          self.MakeRobotPro.goWhere([[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]])
+        },5000)
       })
+    },
+    restoreAction(){
+      console.log('finished')
     },
     addLine(){
       let mLine1=new CreateLine()
@@ -194,6 +193,7 @@ export default {
     }, 
     onMouseDown(event){
       const self=this
+      const robotPart=['Head','Torso','HandR','LowerLeg','Arm','Hand']
       this.raycaster.setFromCamera(self.mouse, self.camera); 
       const intersection = this.raycaster.intersectObjects( self.itemList, true );    
       if(intersection.length>0){
@@ -205,19 +205,19 @@ export default {
           self[mm.name.split('hand')[0]].switchDoor()
         }else if(mm.name.indexOf('CabinetPro')!=-1){
           self[mm.name].switchDoor()
+        }else if(this.MakeRobotPro.isRobotPart(mm.name)){
+          self.MakeRobotPro.actionDo('Jump')
         }
-      }      
-      
+      }
     },
     animate(){
       const self=this
       this.setStaticPosition()
-      // console.log(self.mouse)
       this.raycaster.setFromCamera(self.mouse, self.camera); 
       const intersection = this.raycaster.intersectObjects( self.itemList, true ); 
-      
-      this.animationMixer.update(self.clock.getDelta())
-      
+      if(self.robotMix){
+        self.robotMix.update(self.clock.getDelta())
+      }
       if(intersection.length>0){
         let mm=intersection[0].object
         if(this.outLineName && (this.outLineName==mm.id)){
@@ -228,7 +228,9 @@ export default {
           let box=new THREE.BoxHelper( mm, '#00ffff');  //object 模型
           box.name=mm.id
           this.outLineName=mm.id
-          this.scene.add(box)
+          if(mm.name.indexOf('Cabinet')!=-1){
+            this.scene.add(box) 
+          }         
         }
         this.upDataCallBack()
       }
