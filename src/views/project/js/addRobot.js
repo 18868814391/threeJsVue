@@ -62,24 +62,44 @@ MakeRobot.prototype.isRobotPart=function(name){
   })
   return flag
 }
-MakeRobot.prototype.goWhere=function(points_arr=[[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]]){
+MakeRobot.prototype.goWhere=function(points_arr=[[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]],turn_arr=['-z','-x','z']){
   const self=this
+  let pinh=100 //点数
+  let len=turn_arr.length // 节点数
+  let are=pinh/len
+  let pping=[]
+  for(let i=0;i<len;i++){
+    pping.push(i*are.toFixed(0)*1)
+  }
+  console.log('ppingpping',pping)
   let Vector3s=[]
   points_arr.forEach((v)=>{
     Vector3s.push(new THREE.Vector3(v[0], v[1], v[2]))
   })
   let curve = new THREE.CatmullRomCurve3(Vector3s);//通过类CatmullRomCurve3创建一个3D样条曲线
-  let points = curve.getPoints(100);// 样条曲线均匀分割100分，返回51个顶点坐标
+  let points = curve.getPoints(pinh);// 样条曲线均匀分割100分，返回51个顶点坐标
   console.log('points', points);//控制台查看返回的顶点坐标
   let index=0
   this.timeObj=setInterval(()=>{
     index++
+    let forward=pping.indexOf(index)
+    if(forward!=-1){
+      console.log(index)
+      if(forward==''){
+        return false
+      }
+      let dir=turn_arr[forward]
+      const axis = new THREE.Vector3(0, 1, 0); //向量axis
+      self.model.rotateOnAxis(axis, Math.PI / 2); //绕axis轴旋转π/100
+    }
+    
     if(points[index]&&points[index].x){
       self.model.position.set(points[index].x,points[index].y,points[index].z)
     }else{
+      self.actionDo('Idle')
       clearInterval(self.timeObj)
     }
-  },10)
+  },40)
 }
 MakeRobot.prototype.goWhere_line=function(points_arr=[[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]]){
   const self=this

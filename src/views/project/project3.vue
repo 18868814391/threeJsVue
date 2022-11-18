@@ -149,7 +149,7 @@ export default {
         self.MakeRobotPro.actionDo('Idle')
         setTimeout(()=>{
           self.MakeRobotPro.actionDo('Walking')
-          self.MakeRobotPro.goWhere([[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]])
+          self.MakeRobotPro.goWhere([[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]],['-z','-x','z'])
         },5000)
       })
     },
