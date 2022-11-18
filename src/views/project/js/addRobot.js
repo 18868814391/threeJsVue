@@ -78,19 +78,17 @@ MakeRobot.prototype.goWhere=function(points_arr=[[0,0,20],[0,0,0],[-20,0,0],[-20
   })
   let curve = new THREE.CatmullRomCurve3(Vector3s);//通过类CatmullRomCurve3创建一个3D样条曲线
   let points = curve.getPoints(pinh);// 样条曲线均匀分割100分，返回51个顶点坐标
-  console.log('points', points);//控制台查看返回的顶点坐标
   let index=0
   this.timeObj=setInterval(()=>{
     index++
     let forward=pping.indexOf(index)
     if(forward!=-1){
-      console.log(index)
       if(forward==''){
         return false
       }
       let dir=turn_arr[forward]
       const axis = new THREE.Vector3(0, 1, 0); //向量axis
-      self.model.rotateOnAxis(axis, Math.PI / 2); //绕axis轴旋转π/100
+      self.model.rotateOnAxis(axis, dir); //绕axis轴旋转π/100
     }
     
     if(points[index]&&points[index].x){

@@ -149,7 +149,7 @@ export default {
         self.MakeRobotPro.actionDo('Idle')
         setTimeout(()=>{
           self.MakeRobotPro.actionDo('Walking')
-          self.MakeRobotPro.goWhere([[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]],['-z','-x','z'])
+          self.MakeRobotPro.goWhere([[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]],[Math.PI / 2,Math.PI / 2,Math.PI / 2])
         },5000)
       })
     },
@@ -197,6 +197,7 @@ export default {
       this.raycaster.setFromCamera(self.mouse, self.camera); 
       const intersection = this.raycaster.intersectObjects( self.itemList, true );    
       if(intersection.length>0){
+        console.log(intersection[0])
         let mm=intersection[0].object
         console.log('hickName',mm.name)
         if(mm.name.indexOf('CabinetPro')!=-1&&mm.name.indexOf('_')!=-1){
