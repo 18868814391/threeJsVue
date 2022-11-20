@@ -22,6 +22,7 @@ function groundAdd(callBack) {
   let ground = new THREE.Mesh(groundGeom, groundMate);
   ground.position.y = 0.1;
   ground.receiveShadow = true;
+  ground.name='my_ground'
   let wall1=new THREE.BoxBufferGeometry(100, 30, 3);
   let wall_material=new THREE.MeshPhongMaterial({color: 0xdddddd})
   let wallMesh=new THREE.Mesh(wall1, wall_material);

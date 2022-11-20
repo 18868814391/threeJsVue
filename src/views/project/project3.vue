@@ -147,10 +147,6 @@ export default {
         self.itemList.push(self.robotMesh)
         self.scene.add(self.robotMesh)
         self.MakeRobotPro.actionDo('Idle')
-        setTimeout(()=>{
-          self.MakeRobotPro.actionDo('Walking')
-          self.MakeRobotPro.goWhere([[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]],[Math.PI / 2,Math.PI / 2,Math.PI / 2])
-        },5000)
       })
     },
     restoreAction(){
@@ -208,6 +204,9 @@ export default {
           self[mm.name].switchDoor()
         }else if(this.MakeRobotPro.isRobotPart(mm.name)){
           self.MakeRobotPro.actionDo('Jump')
+        }else if(mm.name=='my_ground'){
+          console.log('intersection[0].object.point',intersection[0].point)
+          self.MakeRobotPro.goPoint(intersection[0].point)         
         }
       }
     },

@@ -8,6 +8,7 @@ let MakeRobot=function(name,callBack){
   this.animations=[]
   this.robotNoewAction=null
   this.timeObj=null
+  this.inMoving=false
 }
 MakeRobot.prototype.loadGLB=function(){
   return new Promise((resolve, reject)=>{
@@ -61,6 +62,43 @@ MakeRobot.prototype.isRobotPart=function(name){
     }
   })
   return flag
+}
+MakeRobot.prototype.goPoint=function(thePoint){
+  if(this.inMoving){
+    return false
+  }
+  const self=this
+  let pinh=50 //点数
+
+
+  //模型的偏移量
+  let offsetAngle = Math.PI;
+  //创建一个4维矩阵
+  let mtx = new THREE.Matrix4();
+  mtx.lookAt(self.model.position.clone(), thePoint, self.model.up);
+  mtx.multiply(new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(0, offsetAngle, 0)));
+  //计算出需要进行旋转的四元数值
+  let toRot = new THREE.Quaternion().setFromRotationMatrix(mtx);
+  //根据以上值调整角度
+  self.model.quaternion.slerp(toRot, 1);
+
+  console.log(self.model.rotation)
+  let Vector3s=[self.model.position,thePoint]
+  let curve = new THREE.CatmullRomCurve3(Vector3s);
+  let points = curve.getPoints(pinh);
+  let index=0
+  this.inMoving=true
+  self.actionDo('Walking')
+  this.timeObj=setInterval(()=>{
+    index++
+    if(points[index]&&points[index].x){
+      self.model.position.set(points[index].x,points[index].y,points[index].z)
+    }else{
+      self.actionDo('Idle')
+      self.inMoving=false
+      clearInterval(self.timeObj)
+    }
+  },40)
 }
 MakeRobot.prototype.goWhere=function(points_arr=[[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]],turn_arr=['-z','-x','z']){
   const self=this
