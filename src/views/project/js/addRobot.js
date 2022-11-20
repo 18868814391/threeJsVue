@@ -16,7 +16,6 @@ MakeRobot.prototype.loadGLB=function(){
     const loader = new GLTFLoader();
     const self=this
     loader.load( `${env=='development'?'':'/threeJs'}/module/RobotExpressive.glb`, function ( gltf ) {
-      console.log('gltf',gltf)
       self.animations=gltf.animations
       self.model = gltf.scene; 
       self.model.position.set(0, 0, 0);
@@ -82,7 +81,9 @@ MakeRobot.prototype.goPoint=function(thePoint){
   //根据以上值调整角度
   self.model.quaternion.slerp(toRot, 1);
 
-  console.log(self.model.rotation)
+  let distance = self.model.position.distanceTo(thePoint);
+  pinh=Math.abs(distance)*2
+
   let Vector3s=[self.model.position,thePoint]
   let curve = new THREE.CatmullRomCurve3(Vector3s);
   let points = curve.getPoints(pinh);
@@ -98,7 +99,7 @@ MakeRobot.prototype.goPoint=function(thePoint){
       self.inMoving=false
       clearInterval(self.timeObj)
     }
-  },40)
+  },20)
 }
 MakeRobot.prototype.goWhere=function(points_arr=[[0,0,20],[0,0,0],[-20,0,0],[-20,0,20]],turn_arr=['-z','-x','z']){
   const self=this
@@ -109,7 +110,6 @@ MakeRobot.prototype.goWhere=function(points_arr=[[0,0,20],[0,0,0],[-20,0,0],[-20
   for(let i=0;i<len;i++){
     pping.push(i*are.toFixed(0)*1)
   }
-  console.log('ppingpping',pping)
   let Vector3s=[]
   points_arr.forEach((v)=>{
     Vector3s.push(new THREE.Vector3(v[0], v[1], v[2]))
