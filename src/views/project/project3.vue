@@ -38,6 +38,7 @@ export default {
       MakeRobotPro:null,
       robotMesh:null,
       robotMix:null,
+      cameraTween:null
     };
   },
   mounted() {
@@ -82,7 +83,7 @@ export default {
 
       let rectLight = new THREE.RectAreaLight(0xff0000,100,3,3);
       rectLight.position.set(35, 40, -30);
-      rectLight.lookAt(35, 0, -30)
+      rectLight.lookAt(new THREE.Vector3(35, 0, -30))
       this.scene.add(rectLight);
     },
     initCamera() {
@@ -207,6 +208,8 @@ export default {
         }else if(mm.name=='my_ground'){
           console.log('intersection[0].object.point',intersection[0].point)
           self.MakeRobotPro.goPoint(intersection[0].point)         
+        }else if(mm.name=='charts'){
+          self.cameraTocharts()
         }
       }
     },
@@ -214,6 +217,9 @@ export default {
       const self=this
       this.setStaticPosition()
       this.raycaster.setFromCamera(self.mouse, self.camera); 
+      if(this.cameraTween){
+        this.cameraTween.update();
+      }
       const intersection = this.raycaster.intersectObjects( self.itemList, true ); 
       if(self.robotMix){
         self.robotMix.update(self.clock.getDelta())
@@ -228,7 +234,7 @@ export default {
           let box=new THREE.BoxHelper( mm, '#00ffff');  //object 模型
           box.name=mm.id
           this.outLineName=mm.id
-          if(mm.name.indexOf('Cabinet')!=-1){
+          if(mm.name.indexOf('Cabinet')!=-1||mm.name.indexOf('charts')!=-1){
             this.scene.add(box) 
           }         
         }
@@ -250,6 +256,42 @@ export default {
       // 转换成平面坐标
       this.left=vector.x * widthHalf + widthHalf;
       this.top=-(vector.y * heightHalf) + heightHalf;
+    },
+    cameraTocharts(){
+      console.log(this.camera.position)
+      console.log(this.controls.target)
+      this.animateCamera(this.camera.position,new THREE.Vector3(0, 20, 0),this.controls.target,new THREE.Vector3(3.7, 13, 9.5),new THREE.Vector3(-48, 15, 15))
+    },
+    animateCamera(current1, target1,current2,target2,lookAt) {
+      const self=this
+      this.cameraTween = new TWEEN.Tween({
+        x1: current1.x, // 相机当前位置x
+        y1: current1.y, // 相机当前位置y
+        z1: current1.z, // 相机当前位置z
+        x2: current2.x, // 控制当前的中心点x
+        y2: current2.y, // 控制当前的中心点y
+        z2: current2.z // 控制当前的中心点z
+      });
+      this.cameraTween.to({
+        x1: target1.x, // 新的相机位置x
+        y1: target1.y, // 新的相机位置y
+        z1: target1.z, // 新的相机位置z
+        x2: target2.x, // 新的控制中心点位置x
+        y2: target2.y, // 新的控制中心点位置x
+        z2: target2.z // 新的控制中心点位置x
+      }, 1000);
+      this.cameraTween.onUpdate(function(val) {
+        self.camera.position.x = val.x1;
+        self.camera.position.y = val.y1;
+        self.camera.position.z = val.z1;
+        self.controls.target.x = val.x2;
+        self.controls.target.y = val.y2;
+        self.controls.target.z = val.z2;
+        self.camera.lookAt(lookAt)
+      })
+      // http://zuoben.top/#4-10
+      this.cameraTween.easing(TWEEN.Easing.Cubic.InOut);
+      this.cameraTween.start();
     }
   },
 };
