@@ -1,6 +1,9 @@
 <template>
   <div id="p3" ref="p3" class="p3">
     <div class="warn" :style="{top:top+'px',left:left+'px'}">⚠</div>
+    <div class="charts" style="width:300px;height:200px;">
+      <Charts :option="option"></Charts>
+    </div>
   </div>
 </template>
 
@@ -15,13 +18,36 @@ import { MakeCabinet } from './js/cabinet.js'
 // import { MakeDesk } from './js/addDesk.js'
 import { MakeRobot } from './js/addRobot.js'
 import { CreateLine } from './js/addLine.js'
+import Charts from '../components/Charts.vue'
 import makeCuboid from "../components/Cuboid.js";
 import makeConvex from "../components/Convex.js"
 import vc from "../components/normalVector.js"
 // import { Face3 } from "three/examples/jsm/deprecated/Geometry";
 export default {
+  components:{
+    Charts
+  },
   data() {
     return {
+      option:{
+        title: {
+          text: '普通图表'
+        },
+        legend: {
+          show:false
+        },
+        xAxis: {
+          data: ['负载1', '负载2', '负载3', '负载4', '负载5', '负载6']
+        },
+        yAxis: {},
+        series: [
+          {
+            name: '负载',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20]
+          }
+        ]
+      },
       top:'',
       left:'',
       MATERIAL_COLOR: "rgb(120, 120, 120)",
@@ -101,10 +127,13 @@ export default {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.$refs.p3.appendChild(self.renderer.domElement);
       this.renderer.render(this.scene, this.camera);
+      this.initControls()
+    },
+    initControls(){
       this.controls = new OrbitControls(this.camera, this.renderer.domElement); // 创建控件对象
       this.controls.addEventListener("change", () => {
         this.renderer.render(this.scene, this.camera);
-      }); // 监听鼠标、键盘事件
+      }); // 监听鼠标、键盘事件      
     },
     upDataCallBack(){
       this.renderer.render(this.scene, this.camera);
@@ -260,7 +289,7 @@ export default {
     cameraTocharts(){
       console.log(this.camera.position)
       console.log(this.controls.target)
-      this.animateCamera(this.camera.position,new THREE.Vector3(0, 20, 0),this.controls.target,new THREE.Vector3(3.7, 13, 9.5),new THREE.Vector3(-48, 15, 15))
+      this.animateCamera(this.camera.position,new THREE.Vector3(0, 20, 0),this.controls.target,new THREE.Vector3(-48, 15, 15),new THREE.Vector3(-48, 15, 15))
     },
     animateCamera(current1, target1,current2,target2,lookAt) {
       const self=this
@@ -301,6 +330,13 @@ export default {
 .p3 {
   width: 100vw;
   height: 100vh;
+  position: relative;
+  .charts{
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #ddd;
+  }
   .warn{
     position: absolute;
     color: red;

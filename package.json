@@ -10,6 +10,7 @@
   "dependencies": {
     "cannon": "^0.6.2",
     "core-js": "^3.6.5",
+    "echarts": "^5.4.0",
     "three": "^0.130.1",
     "three-css2drender": "^1.0.0",
     "three-obj-mtl-loader": "^1.0.3",
