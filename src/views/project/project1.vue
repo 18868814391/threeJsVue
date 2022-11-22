@@ -224,7 +224,9 @@ export default {
         this.name = "";
       }
       this.composer.render();
+      this.stats.begin();
       requestAnimationFrame( this.animate );
+      this.stats.end();
     },
   },
 };

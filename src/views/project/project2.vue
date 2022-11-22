@@ -134,7 +134,9 @@ export default {
       TWEEN.update();
       this.setStaticPosition()
       this.bloomComposer.render();
+      this.stats.begin();
       requestAnimationFrame( self.animate );
+      this.stats.end();
     },
     addRoads(){
       const self=this

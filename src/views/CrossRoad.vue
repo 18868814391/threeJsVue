@@ -161,28 +161,28 @@ export default {
       this.renderer.render(this.scene, this.camera); // 执行渲染操作
     },
     initTexture() {
-      this.carFrontTexture = new this.Texture(40, 80, [
+      this.carFrontTexture = this.Texture(40, 80, [
         { x: 0, y: 10, w: 30, h: 60 },
       ]);
-      this.carBackTexture = new this.Texture(40, 80, [
+      this.carBackTexture = this.Texture(40, 80, [
         { x: 10, y: 10, w: 30, h: 60 },
       ]);
-      this.carRightSideTexture = new this.Texture(110, 40, [
+      this.carRightSideTexture = this.Texture(110, 40, [
         { x: 10, y: 0, w: 50, h: 30 },
         { x: 70, y: 0, w: 30, h: 30 },
       ]);
-      this.carLeftSideTexture = new this.Texture(110, 40, [
+      this.carLeftSideTexture = this.Texture(110, 40, [
         { x: 10, y: 10, w: 50, h: 30 },
         { x: 70, y: 10, w: 30, h: 30 },
       ]);
 
-      this.truckFrontTexture = new this.Texture(30, 30, [
+      this.truckFrontTexture = this.Texture(30, 30, [
         { x: 15, y: 0, w: 10, h: 30 },
       ]);
-      this.truckRightSideTexture = new this.Texture(25, 30, [
+      this.truckRightSideTexture = this.Texture(25, 30, [
         { x: 0, y: 15, w: 10, h: 10 },
       ]);
-      this.truckLeftSideTexture = new this.Texture(25, 30, [
+      this.truckLeftSideTexture = this.Texture(25, 30, [
         { x: 0, y: 5, w: 10, h: 10 },
       ]);
     },

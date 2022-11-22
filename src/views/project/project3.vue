@@ -1,7 +1,7 @@
 <template>
   <div id="p3" ref="p3" class="p3">
-    <div class="warn" :style="{top:top+'px',left:left+'px'}">⚠</div>
-    <div class="charts" style="width:300px;height:200px;">
+    <div class="warn"  :style="{top:top+'px',left:left+'px'}">⚠</div>
+    <div class="charts" :style="{top:top_chart+'px',left:left_chart+'px'}" v-show="chart_pos==0">
       <Charts :option="option"></Charts>
     </div>
   </div>
@@ -31,7 +31,7 @@ export default {
     return {
       option:{
         title: {
-          text: '普通图表'
+          text: '实时负载'
         },
         legend: {
           show:false
@@ -50,6 +50,10 @@ export default {
       },
       top:'',
       left:'',
+      chart_name:'',
+      chart_pos:'',
+      top_chart:-999,
+      left_chart:'',
       MATERIAL_COLOR: "rgb(120, 120, 120)",
       stats: "",
       clock: "",
@@ -227,7 +231,11 @@ export default {
         let mm=intersection[0].object
         console.log('hickName',mm.name)
         if(mm.name.indexOf('CabinetPro')!=-1&&mm.name.indexOf('_')!=-1){
+          let object3d = this.scene.getObjectByName(mm.name);
+          self.chart_name=mm.name
+          self.chart_pos=object3d.position.z
           self[mm.name.split('_')[0]].pickSD(mm.name)
+          self.setChartPos()
         }else if(mm.name.indexOf('CabinetPro')!=-1&&mm.name.indexOf('hand')!=-1){
           self[mm.name.split('hand')[0]].switchDoor()
         }else if(mm.name.indexOf('CabinetPro')!=-1){
@@ -245,6 +253,7 @@ export default {
     animate(){
       const self=this
       this.setStaticPosition()
+      this.setChartPos()
       this.raycaster.setFromCamera(self.mouse, self.camera); 
       if(this.cameraTween){
         this.cameraTween.update();
@@ -269,7 +278,9 @@ export default {
         }
         this.upDataCallBack()
       }
+      this.stats.begin();
       requestAnimationFrame( this.animate );
+      this.stats.end();
     },
     setStaticPosition(){
       const self=this
@@ -286,10 +297,32 @@ export default {
       this.left=vector.x * widthHalf + widthHalf;
       this.top=-(vector.y * heightHalf) + heightHalf;
     },
+    setChartPos(){
+      if(!this.chart_name){
+        return false
+      }
+      const self=this
+      const box3 = new THREE.Box3();
+      const object3d = this.scene.getObjectByName(self.chart_name);
+      const widthHalf = window.innerWidth / 2;
+      const heightHalf = window. innerHeight / 2;
+      // 获取在3D空间里的坐标
+      const vector = new THREE.Vector3();
+      box3.setFromObject(object3d);
+      box3.getCenter(vector);
+      vector.project(self.camera);
+      // 转换成平面坐标
+      this.left_chart=vector.x * widthHalf + widthHalf;
+      this.top_chart=-(vector.y * heightHalf) + heightHalf;
+    },
     cameraTocharts(){
       console.log(this.camera.position)
       console.log(this.controls.target)
-      this.animateCamera(this.camera.position,new THREE.Vector3(0, 20, 0),this.controls.target,new THREE.Vector3(-48, 15, 15),new THREE.Vector3(-48, 15, 15))
+      if((this.camera.position.x+this.camera.position.y+this.camera.position.z)<=100){
+        this.animateCamera(this.camera.position,new THREE.Vector3(40, 80, 200),this.controls.target,new THREE.Vector3(-48, 15, 15),new THREE.Vector3(-48, 15, 15))
+      }else{
+        this.animateCamera(this.camera.position,new THREE.Vector3(0, 20, 0),this.controls.target,new THREE.Vector3(-48, 15, 15),new THREE.Vector3(-48, 15, 15))
+      }
     },
     animateCamera(current1, target1,current2,target2,lookAt) {
       const self=this
@@ -336,6 +369,9 @@ export default {
     top: 0;
     left: 0;
     background: #ddd;
+    width:180px;
+    height:150px;
+    opacity: 0.75;
   }
   .warn{
     position: absolute;
