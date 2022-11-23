@@ -68,9 +68,12 @@ this.meshArr.forEach((mesh)=>{
 MakeCabinet.prototype.giveCabinet = function () {
   return this.cabinet
 };
-MakeCabinet.prototype.switchDoor = function () {
+MakeCabinet.prototype.switchDoor = function (isReset) {
   const self=this
   if(self.inChange){
+    return false
+  }
+  if(isReset&&!(this.flag>=0.0065&&this.openStatus===1)){
     return false
   }
   let axis=new THREE.Vector3(0, 1, 0)
@@ -130,7 +133,6 @@ MakeCabinet.prototype.addSD = function (name) {
   }
 };
 MakeCabinet.prototype.pickSD=function (name){
-  console.log(name)
   if(name.indexOf('top')!=-1){
     this.SD_top.pickOut()
   }
@@ -140,7 +142,12 @@ MakeCabinet.prototype.pickSD=function (name){
   if(name.indexOf('bottom')!=-1){
     this.SD_bottom.pickOut()
   }
-  // Make_SD.pickOut()
+}
+MakeCabinet.prototype.reset=function (){
+  this.SD_top.pickOut('isReset')
+  this.SD_center.pickOut('isReset')
+  this.SD_bottom.pickOut('isReset')
+  this.switchDoor('isReset')
 }
 export {
   MakeCabinet

@@ -1,5 +1,6 @@
 <template>
   <div id="p3" ref="p3" class="p3">
+    <button class="reset" @click="reset()">复位</button>
     <div class="warn"  :style="{top:top+'px',left:left+'px'}">⚠</div>
     <div class="charts" :style="{top:top_chart+'px',left:left_chart+'px'}" v-show="chart_pos==0">
       <Charts :option="option"></Charts>
@@ -32,6 +33,11 @@ export default {
       option:{
         title: {
           text: '实时负载'
+        },
+        grid:{
+          bottom:30,
+          left:30,
+          right:5
         },
         legend: {
           show:false
@@ -316,8 +322,6 @@ export default {
       this.top_chart=-(vector.y * heightHalf) + heightHalf;
     },
     cameraTocharts(){
-      console.log(this.camera.position)
-      console.log(this.controls.target)
       if((this.camera.position.x+this.camera.position.y+this.camera.position.z)<=100){
         this.animateCamera(this.camera.position,new THREE.Vector3(40, 80, 200),this.controls.target,new THREE.Vector3(-48, 15, 15),new THREE.Vector3(-48, 15, 15))
       }else{
@@ -354,6 +358,14 @@ export default {
       // http://zuoben.top/#4-10
       this.cameraTween.easing(TWEEN.Easing.Cubic.InOut);
       this.cameraTween.start();
+    },
+    reset(){
+      this.chart_pos=-99
+      this.animateCamera(this.camera.position,new THREE.Vector3(40, 80, 200),this.controls.target,new THREE.Vector3(0, 0, 0),new THREE.Vector3(0, 0, 0))
+      this.MakeRobotPro.goPoint(new THREE.Vector3(0, 0,25))  
+      this.CabinetPro1.reset()
+      this.CabinetPro2.reset()
+      this.CabinetPro3.reset()
     }
   },
 };
@@ -378,6 +390,11 @@ export default {
     color: red;
     font-size: 20px;
     animation: fade 1000ms infinite;
+  }
+  .reset{
+    position: absolute;
+    right: 10px;
+    top:10px;
   }
   @keyframes fade {
     from {        

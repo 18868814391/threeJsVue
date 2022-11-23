@@ -12,7 +12,7 @@ export default {
   data() {
     return {
       guide: [
-        { name: "数字化机房(工事中)", path: "/project3" },
+        { name: "数字化机房", path: "/project3" },
         { name: "电脑装配", path: "/project1" },
         { name: "数字城市", path: "/project2" },
         { name: "过马路", path: "/crossRoad" },

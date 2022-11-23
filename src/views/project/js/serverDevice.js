@@ -30,11 +30,21 @@ let MakeSD=function(name,callBack){
 MakeSD.prototype.giveSD=function (){
   return this.dice
 }
-MakeSD.prototype.pickOut = function () {
+MakeSD.prototype.pickOut = function (isReset) {
   const self=this
   if(this.inChange){
     return false
   }
+  if(isReset){
+    if(this.step>=25){
+      this.moveIt()
+    }
+  }else{
+    this.moveIt()
+  }
+};
+MakeSD.prototype.moveIt=function(){
+  const self=this
   this.timeObj=setInterval(() => {
     if(this.flag===0&&this.step<=30){
       this.inChange=true
@@ -57,7 +67,7 @@ MakeSD.prototype.pickOut = function () {
     this.dice.position.z=this.step
     self.call_Back()
   },25)
-};
+}
 export{
   MakeSD
 }
