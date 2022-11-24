@@ -2,6 +2,7 @@ import * as THREE from "three";
 import {BufferGeometryUtils} from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { getRotationMatrix } from './rotationMatrix'
 import { MakeSD } from './serverDevice'
+import { giveMap } from './heatMap.js'
 // import {mergeBufferGeometries} from "three/examples/jsm/utils/BufferGeometryUtils.js";
 let MakeCabinet=function(name,callBack){
   const self=this
@@ -25,7 +26,7 @@ let MakeCabinet=function(name,callBack){
     roughness: 0.75,
     metalness: 1
 })
-
+let headtM=giveMap()
 this.b_board=new THREE.BoxBufferGeometry(20, 1, 20);
 this.b_Mesh=new THREE.Mesh(self.b_board, self._material);
 
@@ -61,6 +62,7 @@ this.meshArr.forEach((mesh)=>{
   this.doors.add(self.door)
   this.doors.add(self.doorHand)
   this.cabinet.add(self.singleMergeMesh,self.doors)
+  this.cabinet.add(headtM)
   this.addSD(`${name}_top`)
   this.addSD(`${name}_center`)
   this.addSD(`${name}_bottom`)
