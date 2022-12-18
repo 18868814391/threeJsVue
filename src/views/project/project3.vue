@@ -1,11 +1,14 @@
 <template>
+<div class="con">
+  <div class="bgbg"></div>
   <div id="p3" ref="p3" class="p3">
     <button class="reset" @click="reset()">复位</button>
     <div class="warn"  :style="{top:top+'px',left:left+'px'}">⚠</div>
     <div class="charts" :style="{top:top_chart+'px',left:left_chart+'px'}" v-show="chart_pos==0">
       <Charts :option="option"></Charts>
     </div>
-  </div>
+  </div>  
+</div>
 </template>
 
 <script>
@@ -130,8 +133,10 @@ export default {
     initRender() {
       // 3.渲染器
       const self = this;
-      this.renderer = new THREE.WebGLRenderer();
-      this.renderer.setClearColor(self.MATERIAL_COLOR);
+      this.renderer = new THREE.WebGLRenderer({
+        alpha : true
+      });
+      // this.renderer.setClearColor("rgb(160, 160, 160)");
       this.renderer.shadowMap.enabled = true; // 开启渲染器的阴影功能
       this.renderer.shadowMap.type = THREE.PCFShadowMap; // PCF阴影类型
       this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -372,10 +377,27 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.con{
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.bgbg{
+  width: 100vw;
+  height: 100vh;
+  background: rgba(120, 120, 120, 1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
 .p3 {
   width: 100vw;
   height: 100vh;
   position: relative;
+  z-index: 5;
   .charts{
     position: fixed;
     top: 0;
